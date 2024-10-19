@@ -35,5 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
-application.properties.*
+application-*.yaml
 MYSQL.session.sql

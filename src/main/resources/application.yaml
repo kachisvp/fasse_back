@@ -1,0 +1,13 @@
+spring:
+    application:
+        name: fasse_back
+    # Database Settings
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/_dbname_
+        username: _username_
+        password: _password_
+    sql:
+        init:
+            mode: always
+            encoding: utf-8
