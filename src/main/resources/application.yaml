@@ -11,3 +11,6 @@ spring:
         init:
             mode: always
             encoding: utf-8
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
