@@ -1,6 +1,9 @@
-# fasse_front
-
 # 環境構築
+## Google Chrome
+Google Chromeがインストールされていないと、[flutter doctor -v]が終了しなかったため、インストール
+
+
+
 ## Git For Windows
 ### install
 [Override the default branch name for new repositories]を選択 > [main]に変更
