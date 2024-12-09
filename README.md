@@ -166,6 +166,24 @@ select version();
 
 
 # Visual Studio Code 動作確認手順
+## SpringBoot
+[fasse_back]プロジェクトを[Git Clone]
+[fasse_back]プロジェクトを[Visual Studio Code]で開く
+
+
+### application.yaml設定
+[src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
+以下を修正
+```
+_dbname_: fasse
+_username_: admin
+_password_: [_任意のパスワード_]
+```
+
+[src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
+
+
+
 ## Flutter
 [fasse_front]プロジェクトを[Git Clone]
 [fasse_front]プロジェクトを[Visual Studio Code]で開く
@@ -178,22 +196,18 @@ flutter build web
 flutter run -d chrome
 ```
 
+
+### CORS対応
+Flutter-SpringBootをローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
+
+[C:\Users\_username_\dev\flutter\packages\flutter_tools\lib\src\web\chrome.dart]を開く
+```
+      '--disable-extensions',
+      '--disable-web-security', // 開発用にこの行を追加
+```
+
+[C:\Users\_username_\dev\flutter\bin\cache\flutter_tools.stamp]を削除
+**ビルド時に再作成されるファイルのため、削除しても問題ない**
+
+
 ChromeでFlutterアプリが動作することを確認
-
-
-
-## SpringBoot
-[fasse_back]プロジェクトを[Git Clone]
-[fasse_back]プロジェクトを[Visual Studio Code]で開く
-
-
-### application.yaml設定
-[src/main/resources/application.yaml]をコピーして[src/main/resources/application.local.yaml]を作成
-以下を修正
-```
-_dbname_: fasse
-_username_: admin
-_password_: [_任意のパスワード_]
-```
-
-[src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
