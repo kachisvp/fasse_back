@@ -133,29 +133,33 @@ grant select, insert on fasse.* to admin;
 quit
 ```
 
-
 ### VSCode Extensions
 以下を検索して[install]を押下
-- SQLTools
-- SQLTools MySQL/MariaDB/TiDB
+- MySQL Shell for VS Code
 
-[左のSQLTools]を押下
-[Add New Connection]を押下
-[MySQL]を押下
-以下を入力して[SAVE CONNECTION]を押下
+左の[MySQL Shell for VS Code]を押下
+[DB Connection Overview]を押下
+右下に[Run Welcome Wizard]が表示されたら押下
 ```
-Connection name: MYSQL
-Database: fasse
+The MySQL Shell for VS Code extension cannot run because the web certificate is not installed. Do you want to run the Welcome Wizard to install it?
+Source: MySQL Shell for VS Code
+```
+指示に従って[VC_redist.x64.exe]のインストールが必要な環境もある
+Wizardに従って証明書をインストール
+VSCodeを再起動
+左の[MySQL Shell for VS Code]を押下
+[New Connection]を押下
+以下を入力して[OK]を押下
+```
+Caption: fasse
 Username: admin
 ```
-[CONNECT NOW]を押下
-> The extension 'SQLTools MySQL/MariaDB/TiDB' wants to sign in using SQLTools Driver Credentials
-が表示されたら[Allow]を押下
+左の[DATABASE CONNECTION] > [fasse]を右クリック > [Open New Database Connection]を押下
 install時の[_任意のパスワード_]を入力
 
 
-### [MYSQL.session.sql]のエディタが開いたらバージョンを確認
-以下を入力し、[Ctrl + E] > [Ctrl + E]を押下
+### [fasse]の[DB Notebook]が開いたらバージョンを確認
+以下を入力し、[Ctrl + Enter]を押下
 ```
 select version();
 ```
@@ -211,3 +215,15 @@ Flutter-SpringBootをローカル環境で連携すると、[CORS: Cross-Origin 
 
 
 ChromeでFlutterアプリが動作することを確認
+
+
+
+
+
+
+# [MySQL Shell for VS Code]の証明書削除手順
+Chrome > [設定] > [プライバシーとセキュリティ] > [セキュリティ] > [証明書の管理]を押下
+[ローカル証明書] > [Windowsからインポートした証明書を管理する]を押下
+[信頼されたルート証明機関] > [発行先: MySQL Shell Auto Generated CA Certificate]を選択 > [削除]を押下
+警告されるが、これで削除できる。
+再度、[Run Welcome Wizard]を実行すれば、再インストールされる。
