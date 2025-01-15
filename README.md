@@ -1,4 +1,16 @@
-# 環境構築
+<details>
+
+<summary>Mac環境構築</summary>
+
+work in progress...
+
+</details>
+
+<details>
+
+<summary>Windows環境構築</summary>
+
+# Windows環境構築
 ## Google Chrome
 Google Chromeがインストールされていないと、[flutter doctor -v]が終了しなかったため、インストール
 
@@ -166,9 +178,6 @@ select version();
 
 
 
-
-
-
 # Visual Studio Code 動作確認手順
 ## SpringBoot
 [fasse_back]プロジェクトを[Git Clone]
@@ -218,12 +227,50 @@ ChromeでFlutterアプリが動作することを確認
 
 
 
-
-
-
 # [MySQL Shell for VS Code]の証明書削除手順
 Chrome > [設定] > [プライバシーとセキュリティ] > [セキュリティ] > [証明書の管理]を押下
 [ローカル証明書] > [Windowsからインポートした証明書を管理する]を押下
 [信頼されたルート証明機関] > [発行先: MySQL Shell Auto Generated CA Certificate]を選択 > [削除]を押下
 警告されるが、これで削除できる。
 再度、[Run Welcome Wizard]を実行すれば、再インストールされる。
+
+</details>
+
+<details>
+
+<summary>実装機能</summary>
+
+# システム構成
+- Database: MySQL
+- Back-End: SpringBoot
+- Front-End: Flutter
+
+
+
+# 実装機能
+- データ抽出、表示
+- データ登録
+- 画像登録
+- ファイルアップロード、データ登録
+- ファイルダウンロード
+- PDF出力
+- ログイン
+- ログアウト
+- ログ出力
+- オンデマンドバッチ
+
+
+
+# テスト自動化
+- SpringBootのテスト自動化
+- Flutterのテスト自動化
+
+
+
+# 教育目標
+- SpringBootでMySQLからデータを抽出し、JSONデータを返却できること
+- SpringBootでJSONデータをMySQLに登録できること
+- FlutterでWebAPIのGETメソッドをコールし、返却されたJSONデータを表示できること
+- FlutterでWebAPIのPOSTメソッドをコールし、JSONデータを送信できること
+
+</details>
