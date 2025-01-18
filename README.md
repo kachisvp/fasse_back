@@ -2,7 +2,110 @@
 
 <summary>Mac環境構築</summary>
 
+
+# Mac環境構築
+## Google Chrome
+Google Chromeがインストールされていないと、[flutter doctor -v]が終了しないため、インストールする
+
+
+## Git
+### install
+brew install git
+
+
+### Terminalを開き、versionを確認
+git --version
+
+
+### Git初期設定
+git config --global user.name "Namae Myoji"
+git config --global user.email "_username_@example.com"
+
+
+## SourceTree
+### install
+公式サイトからダウンロード、インストール
+
+
+### Git Credential Manager
+[Git Credential Manager]をinstallしないと、pushするのにtokenが必要になる
+[Git for Windows]の場合、[Git]のinstall時に一緒にinstallされる
+```
+brew install --cask git-credential-manager
+```
+
+
+## Flutter SDK
+### install
+[/Users/_username_/dev/flutter]となる様に保存
+
+
+### PATHに追加
+```
+vi ~/.zshrc
+export PATH=${HOME}/dev/flutter/bin:${PATH}
+source ~/.zshrc
+```
+
+
+### Flutterが利用可能になったことを確認
+Terminalを開き、以下のコマンドを実行
+```
+flutter --version
+flutter doctor -v
+```
+
+
+
+## OpenJDK
+### install
+brew search openjdk
+brew install openjdk
+
+
+### PATHに追加
+```
+vi ~/.zshrc
+export PATH=/usr/local/opt/openjdk/bin:${PATH}
+source ~/.zshrc
+```
+
+
+### Terminalを開き、versionを確認
+java --version
+
+
+
+## Visual Studio Code
+### install
+すべてデフォルトでインストール
+
+
+### システム環境変数に以下を追加
+```
+vi ~/.zshrc
+export SPRING_PROFILES_ACTIVE_local
+source ~/.zshrc
+```
+
+
+### Visual Studio Code Settings
+~~Java設定の必要があるかを確認する~~
+
+
+### Extensions
+以下を検索して[install]を押下
+- Flutter
+- Extension Pack for Java
+- Gradle for Java
+- Spring Boot Extension Pack
+
+
+
+## MySQL
+### install
 work in progress...
+
 
 </details>
 
