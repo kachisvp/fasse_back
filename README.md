@@ -60,13 +60,13 @@ flutter doctor -v
 ## OpenJDK
 ### install
 brew search openjdk
-brew install openjdk
+brew install openjdk@21
 
 
 ### PATHに追加
 ```
 vi ~/.zshrc
-export PATH=/usr/local/opt/openjdk/bin:${PATH}
+export PATH=/usr/local/opt/openjdk@21/bin:${PATH}
 source ~/.zshrc
 ```
 
@@ -104,7 +104,134 @@ source ~/.zshrc
 
 ## MySQL
 ### install
-work in progress...
+defaulではMySQL9.2がinstallされてしまうため、versionを指定
+```
+brew search mysql
+
+brew install mysql@8.4
+brew info mysql
+```
+
+### PATHに追加
+```
+vi ~/.zshrc
+export PATH=/usr/local/opt/mysql@8.4/bin:${PATH}
+source ~/.zshrc
+```
+
+### Terminalを開き、versionを確認
+mysql --version
+
+
+### command
+mysql.server start
+mysql.server restart
+mysql.server stop
+
+
+### databaseを作成
+初回はパスワードなしでログイン
+```
+mysql -uroot
+set password for root@localhost='_任意のパスワード_';
+quit
+```
+
+2回目以降は[_任意のパスワード_]を入力
+```
+mysql -u root -p
+create user admin identified by '_任意のパスワード_';
+create database fasse;
+grant all on fasse.* to admin;
+grant select, insert on fasse.* to admin;
+quit
+```
+
+
+### VSCode Extensions
+以下を検索して[install]を押下
+- MySQL Shell for VS Code
+
+左の[MySQL Shell for VS Code]を押下
+[New Connection]を押下
+以下を入力して[OK]を押下
+```
+Caption: fasse
+Username: admin
+```
+左の[DATABASE CONNECTION] > [fasse]を右クリック > [Open New Database Connection]を押下
+install時の[_任意のパスワード_]を入力
+
+
+### [fasse]の[DB Notebook]が開いたらバージョンを確認
+以下を入力し、[Cmd + Enter]を押下
+```
+select version();
+```
+
+
+### 動作確認用のschema, dataを投入
+以下を入力し、[Cmd + Enter]を押下
+```
+use fasse
+[./src/testresources/schema.sql]を入力し、[Cmd + Enter]を押下
+[./src/testresources/data.sql]を入力し、[Cmd + Enter]を押下
+```
+
+
+
+# Visual Studio Code 動作確認手順
+## SpringBoot
+[fasse_back]プロジェクトを[Git Clone]
+[fasse_back]プロジェクトを[Visual Studio Code]で開く
+
+
+### application.yaml設定
+[src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
+以下を修正
+```
+_dbname_: fasse
+_username_: admin
+_password_: [_任意のパスワード_]
+```
+
+
+### gradlewに実行権限を付与
+```
+chmod +x ./gradlew
+```
+[src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
+[http://localhost:8080/users]にアクセスし、[m_user]からJSONデータを取得することを確認
+
+
+
+## Flutter
+[fasse_front]プロジェクトを[Git Clone]
+[fasse_front]プロジェクトを[Visual Studio Code]で開く
+[Ctrl + @]を押下して[Terminal]を開く
+以下のコマンドを実行する
+```
+flutter clean
+flutter pub get
+flutter build web
+flutter run -d chrome
+```
+
+
+### CORS対応
+Flutter-SpringBootをローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
+
+[~/dev/flutter/packages/flutter_tools/lib/src/web/chrome.dart]を開く
+```
+      '--disable-extensions',
+      '--disable-web-security', // 開発用にこの行を追加
+```
+
+[~/dev/flutter/bin/cacheflutter_tools.stamp]を削除
+**ビルド時に再作成されるファイルのため、削除しても問題ない**
+
+
+ChromeでFlutterアプリが動作することを確認
 
 
 </details>
