@@ -174,8 +174,8 @@ select version();
 以下を入力し、[Cmd + Enter]を押下
 ```
 use fasse
-[./src/testresources/schema.sql]を入力し、[Cmd + Enter]を押下
-[./src/testresources/data.sql]を入力し、[Cmd + Enter]を押下
+[./src/test/resources/schema.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
+[./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
 ```
 
 
@@ -406,6 +406,14 @@ install時の[_任意のパスワード_]を入力
 select version();
 ```
 
+
+### 動作確認用のschema, dataを投入
+以下を入力し、[Cmd + Enter]を押下
+```
+use fasse
+[./src/test/resources/schema.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
+[./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
+```
 
 
 # Visual Studio Code 動作確認手順
