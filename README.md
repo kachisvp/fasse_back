@@ -66,7 +66,8 @@ brew install openjdk@21
 ### PATHに追加
 ```
 vi ~/.zshrc
-export PATH=/usr/local/opt/openjdk@21/bin:${PATH}
+export JAVA_HOME=/usr/local/opt/openjdk@21
+export PATH=${PATH}:/usr/local/opt/openjdk@21/bin
 source ~/.zshrc
 ```
 
