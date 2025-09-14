@@ -1,3 +1,4 @@
+drop table m_user;
 create table m_user
 (
     id int auto_increment,
@@ -5,7 +6,7 @@ create table m_user
     constraint user_pk primary key (id)
 );
 
-/*
+drop table m_food_composition;
 create table m_food_composition
 (
     food_group char(2) not null,
@@ -72,4 +73,3 @@ create table m_food_composition
     memo varchar(400),
     constraint user_pk primary key (food_group, food_no, search_no)
 );
-*/

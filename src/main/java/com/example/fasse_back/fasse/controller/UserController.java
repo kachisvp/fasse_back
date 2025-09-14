@@ -3,6 +3,7 @@ package com.example.fasse_back.fasse.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.fasse_back.user.service.UserService;
@@ -19,9 +20,15 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
-    public String findAll() throws JsonProcessingException {
-        log.info(UserController.class.toString() + ": findAll()");
+    public String getUsers(@RequestParam(value = "id", required = false) String id) throws JsonProcessingException {
+        log.info(UserController.class.toString() + ": getUsers()");
 
-        return objectMapper.writeValueAsString(userService.findAll());
+        if (id == null) {
+            // リクエストパラメータが存在しなければ全件検索する
+            return objectMapper.writeValueAsString(userService.findAll());
+        } else {
+            // FIXME リクエストパラメータのidを検索して返す
+            return null;
+        }
     }
 }
