@@ -61,6 +61,8 @@ flutter --version
 flutter doctor -v
 ```
 
+**10 分程度、何も表示されずに処理に時間が掛かる可能性あり**
+
 ## OpenJDK
 
 ### install
@@ -196,14 +198,14 @@ use fasse
 [./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
 ```
 
-## Visual Studio Code 動作確認手順
+# Visual Studio Code 動作確認手順
 
-### SpringBoot
+## SpringBoot
 
 [fasse_back]プロジェクトを[Git Clone]
 [fasse_back]プロジェクトを[Visual Studio Code]で開く
 
-#### application.yaml 設定
+### application.yaml 設定
 
 [src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
 以下を修正
@@ -214,7 +216,7 @@ _username_: admin
 _password_: [_任意のパスワード_]
 ```
 
-#### gradlew に実行権限を付与
+### gradlew に実行権限を付与
 
 ```
 chmod +x ./gradlew
@@ -223,7 +225,7 @@ chmod +x ./gradlew
 [src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
 [http://localhost:8080/users]にアクセスし、[m_user]から JSON データを取得することを確認
 
-### Flutter
+## Flutter
 
 [fasse_front]プロジェクトを[Git Clone]
 [fasse_front]プロジェクトを[Visual Studio Code]で開く
@@ -237,7 +239,7 @@ flutter build web
 flutter run -d chrome
 ```
 
-#### CORS 対応
+### CORS 対応
 
 Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
 
@@ -263,7 +265,7 @@ Chrome で Flutter アプリが動作することを確認
 
 ## Google Chrome
 
-Google Chrome がインストールされていないと、[flutter doctor -v]が終了しなかったため、インストール
+Google Chrome がインストールされていないと、[flutter doctor -v]が終了しないため、インストールする
 
 ## Git For Windows
 
@@ -448,9 +450,9 @@ use fasse
 [./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
 ```
 
-## Visual Studio Code 動作確認手順
+# Visual Studio Code 動作確認手順
 
-### MySQL
+## MySQL
 
 コマンドプロンプトを開き、以下のコマンドを実行
 
@@ -468,12 +470,12 @@ mysqld
 [MySQL80]を右クリック > [再起動]を押下
 ```
 
-### SpringBoot
+## SpringBoot
 
 [fasse_back]プロジェクトを[Git Clone]
 [fasse_back]プロジェクトを[Visual Studio Code]で開く
 
-#### application.yaml 設定
+### application.yaml 設定
 
 [src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
 以下を修正
@@ -486,7 +488,7 @@ _password_: [_任意のパスワード_]
 
 [src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
 
-### Flutter
+## Flutter
 
 [fasse_front]プロジェクトを[Git Clone]
 [fasse_front]プロジェクトを[Visual Studio Code]で開く
@@ -500,7 +502,7 @@ flutter build web
 flutter run -d chrome
 ```
 
-#### CORS 対応
+### CORS 対応
 
 Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
 
@@ -534,15 +536,13 @@ flutter doctor --android-licenses
 
 <summary>実装機能</summary>
 
-# 実装機能
-
-## システム構成
+# システム構成
 
 - Database: MySQL
 - Back-End: SpringBoot
 - Front-End: Flutter
 
-## 実装機能
+# 実装機能
 
 - データ抽出、表示
 - データ登録
@@ -555,12 +555,12 @@ flutter doctor --android-licenses
 - ログ出力
 - オンデマンドバッチ
 
-## テスト自動化
+# テスト自動化
 
 - SpringBoot のテスト自動化
 - Flutter のテスト自動化
 
-## 教育目標
+# 教育目標
 
 - SpringBoot で MySQL からデータを抽出し、JSON データを返却できること
 - SpringBoot で JSON データを MySQL に登録できること
