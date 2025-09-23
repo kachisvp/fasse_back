@@ -198,14 +198,14 @@ use fasse
 [./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
 ```
 
-# Visual Studio Code 動作確認手順
+## Visual Studio Code 動作確認手順
 
-## SpringBoot
+### SpringBoot
 
 [fasse_back]プロジェクトを[Git Clone]
 [fasse_back]プロジェクトを[Visual Studio Code]で開く
 
-### application.yaml 設定
+#### application.yaml 設定
 
 [src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
 以下を修正
@@ -216,7 +216,7 @@ _username_: admin
 _password_: [_任意のパスワード_]
 ```
 
-### gradlew に実行権限を付与
+#### gradlew に実行権限を付与
 
 ```
 chmod +x ./gradlew
@@ -225,7 +225,7 @@ chmod +x ./gradlew
 [src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
 [http://localhost:8080/users]にアクセスし、[m_user]から JSON データを取得することを確認
 
-## Flutter
+### Flutter
 
 [fasse_front]プロジェクトを[Git Clone]
 [fasse_front]プロジェクトを[Visual Studio Code]で開く
@@ -239,7 +239,7 @@ flutter build web
 flutter run -d chrome
 ```
 
-### CORS 対応
+#### CORS 対応
 
 Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
 
@@ -250,7 +250,7 @@ Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin
       '--disable-web-security', // 開発用にこの行を追加
 ```
 
-[~/dev/flutter/bin/cacheflutter_tools.stamp]を削除
+[~/dev/flutter/bin/cache/flutter_tools.stamp]を削除
 **ビルド時に再作成されるファイルのため、削除しても問題ない**
 
 Chrome で Flutter アプリが動作することを確認
@@ -294,11 +294,11 @@ git config --global user.email "_username_@example.com"
 
 ### install
 
-[C:\Users_username\_\dev\flutter\]となる様に保存
+[C:\Users\'_username_'\dev\flutter\]となる様に保存
 
 ### システム環境変数に以下を追加
 
-PATH=%PATH%;"C:\Users_username\_\dev\flutter\bin"
+PATH=%PATH%;"C:\Users\'_username_'\dev\flutter\bin"
 
 ### Flutter が利用可能になっていることを確認
 
@@ -314,11 +314,11 @@ flutter doctor -v
 ## OpenJDK21
 
 [openjdk-21+35_windows-x64_bin.zip]
-[C:\Users_username\_\dev\jdk-21\]となる様に保存
+[C:\Users\'_username_'\dev\jdk-21\]となる様に保存
 
 ### システム環境変数に以下を追加
 
-JAVA*HOME="C:\Users_username*\dev\jdk-21"
+JAVA_HOME="C:\Users\'_username_'\dev\jdk-21"
 PATH=%PATH%;"%JAVA_HOME%\bin"
 
 ### コマンドプロンプトを開き、version を確認
@@ -450,9 +450,9 @@ use fasse
 [./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
 ```
 
-# Visual Studio Code 動作確認手順
+## Visual Studio Code 動作確認手順
 
-## MySQL
+### MySQL
 
 コマンドプロンプトを開き、以下のコマンドを実行
 
@@ -470,12 +470,12 @@ mysqld
 [MySQL80]を右クリック > [再起動]を押下
 ```
 
-## SpringBoot
+### SpringBoot
 
 [fasse_back]プロジェクトを[Git Clone]
 [fasse_back]プロジェクトを[Visual Studio Code]で開く
 
-### application.yaml 設定
+#### application.yaml 設定
 
 [src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
 以下を修正
@@ -488,7 +488,7 @@ _password_: [_任意のパスワード_]
 
 [src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
 
-## Flutter
+### Flutter
 
 [fasse_front]プロジェクトを[Git Clone]
 [fasse_front]プロジェクトを[Visual Studio Code]で開く
@@ -502,7 +502,7 @@ flutter build web
 flutter run -d chrome
 ```
 
-### CORS 対応
+#### CORS 対応
 
 Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
 
@@ -518,7 +518,7 @@ Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin
 
 Chrome で Flutter アプリが動作することを確認
 
-## [MySQL Shell for VS Code]の証明書削除手順
+### [MySQL Shell for VS Code]の証明書削除手順
 
 Chrome > [設定] > [プライバシーとセキュリティ] > [セキュリティ] > [証明書の管理]を押下
 [ローカル証明書] > [Windows からインポートした証明書を管理する]を押下
@@ -526,7 +526,7 @@ Chrome > [設定] > [プライバシーとセキュリティ] > [セキュリテ
 警告されるが、これで削除できる。
 再度、[Run Welcome Wizard]を実行すれば、再インストールされる。
 
-## Android Studio をインストールした場合
+### Android Studio をインストールした場合
 
 flutter doctor --android-licenses
 
