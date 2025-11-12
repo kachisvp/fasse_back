@@ -132,9 +132,10 @@ source ~/.zshrc
 
 ~~Java 設定の必要があるかを確認する~~
 
-### Extensions
+### VSCode Extensions
 
-以下を検索して[install]を押下
+[Visual Studio Code] > [左側の Extensions]を押下
+[Search Extensions in Marketplace]で以下を検索して[install]を押下
 
 - Flutter
 - Extension Pack for Java
@@ -195,7 +196,8 @@ quit
 
 ### VSCode Extensions
 
-以下を検索して[install]を押下
+[Visual Studio Code] > [左側の Extensions]を押下
+[Search Extensions in Marketplace]で以下を検索して[install]を押下
 
 - MySQL Shell for VS Code
 
@@ -388,7 +390,7 @@ SPRING_PROFILES_ACTIVE=local
 }
 ```
 
-### Extensions
+### VSCode Extensions
 
 [Visual Studio Code] > [左側の Extensions]を押下
 [Search Extensions in Marketplace]で以下を検索して[install]を押下
@@ -436,7 +438,8 @@ quit
 
 ### VSCode Extensions
 
-以下を検索して[install]を押下
+[Visual Studio Code] > [左側の Extensions]を押下
+[Search Extensions in Marketplace]で以下を検索して[install]を押下
 
 - MySQL Shell for VS Code
 
