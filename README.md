@@ -2,29 +2,42 @@
 
 <summary>よく使うコマンド</summary>
 
-# Mac
+# MySQL
+
+## Mac
 
 ```
 mysql --version
 mysql.server start
 mysql.server restart
 mysql.server stop
+mysql -u root -p -e "select version();" 2>&1
 ```
 
-# Windows
+## Windows
 
-## Command Prompt
+VSCodeを管理者権限で起動すること
 
 ```
 mysql --version
-mysqladmin -u root -p shutdown
-mysqld
+net start MySQL80
+net stop MySQL80
+mysql -u root -p -e "select version();" 2>&1
 ```
 
-## MySQL
+# VSCode
 
 ```
-select version();
+./gradlew --refresh-dependencies
+./gradlew build
+./gradlew test
+./gradlew bootRun
+```
+
+[Ctrl + Shift + P]を押下し、コマンドパレットを開く
+
+```
+> Developer: Reload Window
 ```
 
 </details>
@@ -351,7 +364,7 @@ flutter doctor -v
 
 ### システム環境変数に以下を追加
 
-JAVA_HOME="C:\Users\'_username_'\dev\jdk-21"
+JAVA*HOME="C:\Users\'\_username*'\dev\jdk-21"
 PATH=%PATH%;"%JAVA_HOME%\bin"
 
 ### コマンドプロンプトを開き、version を確認
