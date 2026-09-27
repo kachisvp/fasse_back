@@ -39,3 +39,6 @@ out/
 .vscode/
 application-*.yaml
 MYSQL.session.sql
+
+### Application logs ###
+logs/

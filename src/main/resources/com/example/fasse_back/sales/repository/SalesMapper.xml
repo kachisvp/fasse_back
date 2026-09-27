@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.fasse_back.sales.repository.SalesMapper">
+
+    <sql id="headerColumns">
+        id, sales_no, sales_datetime, business_date, table_no, customer_count, subtotal, tax_amount,
+        discount_amount, total_amount, payment_method, remarks, created_at, updated_at
+    </sql>
+
+    <select id="findHeaders" resultType="com.example.fasse_back.sales.entity.SalesHeader">
+        SELECT <include refid="headerColumns"/>
+        FROM t_sales_header
+        WHERE business_date BETWEEN #{from} AND #{to}
+        ORDER BY business_date, sales_no
+    </select>
+
+    <select id="findHeaderById" resultType="com.example.fasse_back.sales.entity.SalesHeader">
+        SELECT <include refid="headerColumns"/>
+        FROM t_sales_header
+        WHERE id = #{id}
+    </select>
+
+    <!-- 明細の並び順は保証しない(design.md 2.2 節) -->
+    <select id="findDetailsBySalesId" resultType="com.example.fasse_back.sales.entity.SalesDetail">
+        SELECT id, sales_id, menu_id, quantity, unit_price, amount, tax_rate
+        FROM t_sales_detail
+        WHERE sales_id = #{salesId}
+    </select>
+
+    <insert id="insertHeader">
+        INSERT INTO t_sales_header (id, sales_no, sales_datetime, business_date, table_no, customer_count,
+                                    subtotal, tax_amount, discount_amount, total_amount, payment_method, remarks)
+        VALUES (#{id}, #{salesNo}, #{salesDatetime}, #{businessDate}, #{tableNo}, #{customerCount},
+                #{subtotal}, #{taxAmount}, #{discountAmount}, #{totalAmount}, #{paymentMethod}, #{remarks})
+    </insert>
+
+    <!-- 伝票番号・created_at は更新しない -->
+    <update id="updateHeader">
+        UPDATE t_sales_header
+        SET sales_datetime = #{salesDatetime},
+            business_date = #{businessDate},
+            table_no = #{tableNo},
+            customer_count = #{customerCount},
+            subtotal = #{subtotal},
+            tax_amount = #{taxAmount},
+            discount_amount = #{discountAmount},
+            total_amount = #{totalAmount},
+            payment_method = #{paymentMethod},
+            remarks = #{remarks},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteHeader">
+        DELETE FROM t_sales_header
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="insertDetails">
+        INSERT INTO t_sales_detail (id, sales_id, menu_id, quantity, unit_price, amount, tax_rate)
+        VALUES
+        <foreach collection="details" item="d" separator=",">
+            (#{d.id}, #{d.salesId}, #{d.menuId}, #{d.quantity}, #{d.unitPrice}, #{d.amount}, #{d.taxRate})
+        </foreach>
+    </insert>
+
+    <delete id="deleteDetailsBySalesId">
+        DELETE FROM t_sales_detail
+        WHERE sales_id = #{salesId}
+    </delete>
+
+</mapper>

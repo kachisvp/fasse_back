@@ -1,0 +1,6 @@
+id,item_name,unit,standard_price,tax_category,is_active
+1,キャベツ,玉,200.00,REDUCED,1
+2,豚バラ肉,kg,1800.00,REDUCED,1
+3,生ビール樽,樽,15000.00,STANDARD,1
+4,割り箸,袋,,STANDARD,1
+5,旧仕入品目,個,100.00,REDUCED,0

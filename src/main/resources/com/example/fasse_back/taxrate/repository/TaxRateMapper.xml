@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.fasse_back.taxrate.repository.TaxRateMapper">
+
+    <sql id="columns">
+        id, tax_category, description, rate, valid_from, valid_to, created_at, updated_at
+    </sql>
+
+    <!-- ENUM 型の列は定義順(STANDARD, REDUCED, EXEMPT)で並ぶ -->
+    <select id="findAll" resultType="com.example.fasse_back.taxrate.entity.TaxRate">
+        SELECT <include refid="columns"/>
+        FROM m_tax_rate
+        <where>
+            <if test="taxCategory != null">tax_category = #{taxCategory}</if>
+        </where>
+        ORDER BY tax_category, valid_from
+    </select>
+
+    <select id="findByKey" resultType="com.example.fasse_back.taxrate.entity.TaxRate">
+        SELECT <include refid="columns"/>
+        FROM m_tax_rate
+        WHERE tax_category = #{taxCategory}
+          AND valid_from = #{validFrom}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO m_tax_rate (tax_category, description, rate, valid_from, valid_to)
+        VALUES (#{taxCategory}, #{description}, #{rate}, #{validFrom}, #{validTo})
+    </insert>
+
+    <update id="update">
+        UPDATE m_tax_rate
+        SET description = #{description},
+            rate = #{rate},
+            valid_to = #{validTo},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE tax_category = #{taxCategory}
+          AND valid_from = #{validFrom}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM m_tax_rate
+        WHERE tax_category = #{taxCategory}
+          AND valid_from = #{validFrom}
+    </delete>
+
+</mapper>

@@ -1,0 +1,6 @@
+id,tax_category,description,rate,valid_from,valid_to
+1,STANDARD,標準税率,0.0500,1997-04-01,2014-03-31
+2,STANDARD,標準税率,0.0800,2014-04-01,2019-09-30
+3,STANDARD,標準税率,0.1000,2019-10-01,
+4,REDUCED,軽減税率(食品等),0.0800,2019-10-01,
+5,EXEMPT,非課税,0.0000,2019-10-01,

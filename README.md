@@ -29,10 +29,17 @@ mysql -u root -p -e "select version();" 2>&1
 
 ```
 ./gradlew --refresh-dependencies
+# ビルド(テスト・カバレッジ 80% の検証を含む)
 ./gradlew build
+# テスト(fasse_test データベースを使用する)
 ./gradlew test
+# カバレッジレポート(build/reports/jacoco/test/html/index.html)
+./gradlew jacocoTestReport
+# ローカル起動(システム環境変数 SPRING_PROFILES_ACTIVE=local が必要)
 ./gradlew bootRun
 ```
+
+**テストは[fasse_test]のデータを削除・投入する。データベース名が[_test]で終わらない場合、テストデータの投入は中止される**
 
 [Ctrl + Shift + P]を押下し、コマンドパレットを開く
 
@@ -399,6 +406,23 @@ fasse:
 - [public-key-pem]が未設定・不正の場合もアプリケーションは起動するが、全 API が 401 を返す
 
 [src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
+
+- 起動時に Flyway が[fasse]にテーブルを作成する(作成済みの場合は未適用のマイグレーションのみ適用する)
+- ログはコンソールと[logs/fasse_back.log]に出力される(日次ローテーション、7 日保持)
+
+#### JWT の取得と API の呼び出し
+
+本リポジトリは JWT を発行しないため、[fasse_infra]の stg 環境の JWT 発行 API で取得する(有効期限 30 日)
+
+- [POST /auth/token](AccessKey 経路)を呼び出して JWT を取得する。リクエストの形式は[fasse_infra]の[docs/specs/authentication/]を参照
+- API の呼び出し時は[Authorization: Bearer <JWT>]ヘッダを付ける
+- Postman で確認する場合は[fasse_infra/postman/]のコレクションを使い、ベース URL を[http://localhost:8080]に変更した環境で実行する
+
+```
+curl -H "Authorization: Bearer <JWT>" http://localhost:8080/items
+```
+
+> JWT が無い・不正な場合は 401 と[{"message": "...", "requestId": "..."}]が返る
 
 ### Flutter
 

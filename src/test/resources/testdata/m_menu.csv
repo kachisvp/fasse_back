@@ -1,0 +1,6 @@
+id,menu_name,category,standard_price,tax_category,is_active
+1,生ビール,ドリンク,600.00,STANDARD,1
+2,焼き鳥盛り合わせ,フード,980.00,STANDARD,1
+3,枝豆,フード,400.00,STANDARD,1
+4,ウーロン茶,ドリンク,300.00,STANDARD,1
+5,お持ち帰り弁当,テイクアウト,1200.00,REDUCED,0

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.fasse_back.supplier.repository.SupplierMapper">
+
+    <sql id="columns">
+        id, supplier_name, postal_code, address, phone_number, email, is_active, created_at, updated_at
+    </sql>
+
+    <select id="findAll" resultType="com.example.fasse_back.supplier.entity.Supplier">
+        SELECT <include refid="columns"/>
+        FROM m_supplier
+        ORDER BY id
+    </select>
+
+    <select id="findById" resultType="com.example.fasse_back.supplier.entity.Supplier">
+        SELECT <include refid="columns"/>
+        FROM m_supplier
+        WHERE id = #{id}
+    </select>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM m_supplier WHERE id = #{id})
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO m_supplier (supplier_name, postal_code, address, phone_number, email, is_active)
+        VALUES (#{supplierName}, #{postalCode}, #{address}, #{phoneNumber}, #{email}, #{isActive})
+    </insert>
+
+    <update id="update">
+        UPDATE m_supplier
+        SET supplier_name = #{supplierName},
+            postal_code = #{postalCode},
+            address = #{address},
+            phone_number = #{phoneNumber},
+            email = #{email},
+            is_active = #{isActive},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="deactivate">
+        UPDATE m_supplier
+        SET is_active = FALSE,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+</mapper>

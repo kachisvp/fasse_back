@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.fasse_back.common.slipno.SlipNoMapper">
+
+    <insert id="increment">
+        INSERT INTO t_slip_no_counter (counter_name, value)
+        VALUES (#{counterName}, LAST_INSERT_ID(1))
+        ON DUPLICATE KEY UPDATE value = LAST_INSERT_ID(value + 1)
+    </insert>
+
+    <!-- 同一トランザクション内で複数回呼ばれてもキャッシュを使わない -->
+    <select id="selectLastInsertId" resultType="long" flushCache="true" useCache="false">
+        SELECT LAST_INSERT_ID()
+    </select>
+
+</mapper>

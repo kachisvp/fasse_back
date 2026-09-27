@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.fasse_back.item.repository.ItemMapper">
+
+    <sql id="columns">
+        id, item_name, unit, standard_price, tax_category, is_active, created_at, updated_at
+    </sql>
+
+    <select id="findAll" resultType="com.example.fasse_back.item.entity.Item">
+        SELECT <include refid="columns"/>
+        FROM m_item
+        ORDER BY id
+    </select>
+
+    <select id="findById" resultType="com.example.fasse_back.item.entity.Item">
+        SELECT <include refid="columns"/>
+        FROM m_item
+        WHERE id = #{id}
+    </select>
+
+    <select id="findExistingIds" resultType="long">
+        SELECT id
+        FROM m_item
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO m_item (item_name, unit, standard_price, tax_category, is_active)
+        VALUES (#{itemName}, #{unit}, #{standardPrice}, #{taxCategory}, #{isActive})
+    </insert>
+
+    <update id="update">
+        UPDATE m_item
+        SET item_name = #{itemName},
+            unit = #{unit},
+            standard_price = #{standardPrice},
+            tax_category = #{taxCategory},
+            is_active = #{isActive},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="deactivate">
+        UPDATE m_item
+        SET is_active = FALSE,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+</mapper>

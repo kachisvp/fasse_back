@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.fasse_back.purchase.repository.PurchaseMapper">
+
+    <sql id="headerColumns">
+        id, purchase_no, supplier_id, purchase_date, delivery_date, subtotal, tax_amount, total_amount,
+        remarks, created_at, updated_at
+    </sql>
+
+    <select id="findHeaders" resultType="com.example.fasse_back.purchase.entity.PurchaseHeader">
+        SELECT <include refid="headerColumns"/>
+        FROM t_purchase_header
+        WHERE purchase_date BETWEEN #{from} AND #{to}
+        ORDER BY purchase_date, purchase_no
+    </select>
+
+    <select id="findHeaderById" resultType="com.example.fasse_back.purchase.entity.PurchaseHeader">
+        SELECT <include refid="headerColumns"/>
+        FROM t_purchase_header
+        WHERE id = #{id}
+    </select>
+
+    <!-- 明細の並び順は保証しない(design.md 2.2 節) -->
+    <select id="findDetailsByPurchaseId" resultType="com.example.fasse_back.purchase.entity.PurchaseDetail">
+        SELECT id, purchase_id, item_id, quantity, unit_price, amount, tax_rate
+        FROM t_purchase_detail
+        WHERE purchase_id = #{purchaseId}
+    </select>
+
+    <insert id="insertHeader">
+        INSERT INTO t_purchase_header (id, purchase_no, supplier_id, purchase_date, delivery_date, subtotal,
+                                       tax_amount, total_amount, remarks)
+        VALUES (#{id}, #{purchaseNo}, #{supplierId}, #{purchaseDate}, #{deliveryDate}, #{subtotal},
+                #{taxAmount}, #{totalAmount}, #{remarks})
+    </insert>
+
+    <!-- 伝票番号・created_at は更新しない -->
+    <update id="updateHeader">
+        UPDATE t_purchase_header
+        SET supplier_id = #{supplierId},
+            purchase_date = #{purchaseDate},
+            delivery_date = #{deliveryDate},
+            subtotal = #{subtotal},
+            tax_amount = #{taxAmount},
+            total_amount = #{totalAmount},
+            remarks = #{remarks},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteHeader">
+        DELETE FROM t_purchase_header
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="insertDetails">
+        INSERT INTO t_purchase_detail (id, purchase_id, item_id, quantity, unit_price, amount, tax_rate)
+        VALUES
+        <foreach collection="details" item="d" separator=",">
+            (#{d.id}, #{d.purchaseId}, #{d.itemId}, #{d.quantity}, #{d.unitPrice}, #{d.amount}, #{d.taxRate})
+        </foreach>
+    </insert>
+
+    <delete id="deleteDetailsByPurchaseId">
+        DELETE FROM t_purchase_detail
+        WHERE purchase_id = #{purchaseId}
+    </delete>
+
+</mapper>
