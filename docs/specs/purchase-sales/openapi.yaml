@@ -1,0 +1,1051 @@
+openapi: 3.0.3
+info:
+  title: Fasse 仕入・売上管理API
+  version: "1.0.0"
+  description: |
+    仕入・売上管理のAPI仕様（WebAPI受口: Spring Boot、データストア: Aurora MySQL Serverless）。詳細はdesign.mdを参照。
+    全エンドポイントでJWT認証（Authorization: Bearer <JWT>）が必須。詳細はdocs/specs/authenticationを参照。
+
+    リクエストの扱い（詳細はdesign.md「入力検証・エラー応答」）:
+    - リクエストボディ・パラメータは本仕様のスキーマで検証し、満たさない場合は400を返す
+    - スキーマに定義されていない項目、およびサーバーが管理する項目（id、purchase_no/sales_no、created_at、updated_at）はリクエストに含まれていても無視する
+    - PUTで任意項目を省略した場合（nullを指定した場合を含む）は既存の値を維持する
+    - 参照先のマスタ（supplier_id、item_id、menu_id）が存在しない場合は400を返す
+    - DBの列定義（design.md「DDL」）の文字数・整数部の桁数を超える値は400を返す
+    - created_at/updated_atはUTCのISO 8601文字列。業務日付・日時（purchase_date、business_date、sales_datetime等）はJST固定
+
+servers:
+  - url: http://localhost:8080
+    description: ローカル実行（Spring Boot）
+  - url: https://{apiId}.execute-api.{region}.amazonaws.com/stg
+    description: stg環境（API Gateway経由）
+    variables:
+      apiId:
+        default: apiId
+        description: API GatewayのREST API ID（デプロイ後に確認する）
+      region:
+        default: ap-northeast-1
+
+security:
+  - bearerAuth: []
+
+paths:
+  /items:
+    get:
+      summary: 品目一覧取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: 品目登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /items/{id}:
+    parameters:
+      - $ref: "#/components/parameters/MasterId"
+    get:
+      summary: 品目取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: 品目更新
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: 品目削除（論理削除。is_activeをfalseに更新し、行自体は物理削除しない）
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /suppliers:
+    get:
+      summary: 仕入先一覧取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supplier"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: 仕入先登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /suppliers/{id}:
+    parameters:
+      - $ref: "#/components/parameters/MasterId"
+    get:
+      summary: 仕入先取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: 仕入先更新
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: 仕入先削除（論理削除。is_activeをfalseに更新し、行自体は物理削除しない）
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /menus:
+    get:
+      summary: メニュー一覧取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Menu"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: メニュー登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Menu"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /menus/{id}:
+    parameters:
+      - $ref: "#/components/parameters/MasterId"
+    get:
+      summary: メニュー取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Menu"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: メニュー更新
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Menu"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: メニュー削除（論理削除。is_activeをfalseに更新し、行自体は物理削除しない）
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /tax-rates:
+    get:
+      summary: 消費税率マスタ一覧取得
+      parameters:
+        - name: tax_category
+          in: query
+          required: false
+          description: 指定時はこの税区分のみに絞り込む。未指定時は全件
+          schema:
+            $ref: "#/components/schemas/TaxCategory"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaxRate"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: 消費税率登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaxRateInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxRate"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /tax-rates/{taxCategory}/{validFrom}:
+    parameters:
+      - $ref: "#/components/parameters/TaxCategoryPath"
+      - $ref: "#/components/parameters/ValidFrom"
+    get:
+      summary: 消費税率取得
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxRate"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: 消費税率更新（tax_category・valid_fromはパスの値が優先され、リクエストボディの値は無視される。税率改定時はvalid_toの設定＋新期間のPOSTで対応するのが基本運用）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaxRateUpdateInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxRate"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: 消費税率削除（物理削除。仕入/売上明細はtax_rateを数値でスナップショット保持しFK参照しないため、削除しても既存伝票に影響しない）
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /purchases:
+    get:
+      summary: 仕入伝票一覧取得（日付範囲）
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PurchaseHeader"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: 仕入伝票登録（ヘッダ+明細を1トランザクションで登録、purchase_noはサーバ採番）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /purchases/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: 仕入伝票取得（ヘッダ+明細）
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: 仕入伝票更新（ヘッダ+明細をまとめて更新。明細は全洗い替え＝リクエストのdetailsに無い既存明細は削除される）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Purchase"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: 仕入伝票削除（ヘッダ+明細を1トランザクションでまとめて物理削除）
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /sales:
+    get:
+      summary: 売上伝票一覧取得（日付範囲）
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SalesHeader"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: 売上伝票登録（ヘッダ+明細を1トランザクションで登録、sales_noはサーバ採番）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SalesInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sales"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /sales/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      summary: 売上伝票取得（ヘッダ+明細）
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sales"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: 売上伝票更新（ヘッダ+明細をまとめて更新。明細は全洗い替え＝リクエストのdetailsに無い既存明細は削除される）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SalesInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sales"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: 売上伝票削除（ヘッダ+明細を1トランザクションでまとめて物理削除）
+      responses:
+        "204":
+          description: No Content
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MasterId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    TaxCategoryPath:
+      name: taxCategory
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/TaxCategory"
+    ValidFrom:
+      name: validFrom
+      in: path
+      required: true
+      schema:
+        type: string
+        format: date
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT発行API（POST /auth/token、POST /auth/token/cognito）で取得したKMS署名のJWT。詳細はdocs/specs/authenticationを参照
+
+  responses:
+    BadRequest:
+      description: リクエストがスキーマを満たさない（messageに不備のある項目名を含む）
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: JWTが無い、形式・署名が不正、または有効期限切れ
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: 同じキー（tax_category + valid_from）の行が既に存在する
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalServerError:
+      description: 予期しないエラー（messageは固定文言。詳細はログにのみ出力する）
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: 利用者向けのメッセージ
+        requestId:
+          type: string
+          description: 問い合わせ・ログ調査用のリクエストID
+
+    ItemInput:
+      type: object
+      required: [item_name, unit, tax_category]
+      properties:
+        item_name:
+          type: string
+        unit:
+          type: string
+        standard_price:
+          type: number
+        tax_category:
+          $ref: "#/components/schemas/TaxCategory"
+        is_active:
+          type: boolean
+          default: true
+    Item:
+      allOf:
+        - $ref: "#/components/schemas/ItemInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    SupplierInput:
+      type: object
+      required: [supplier_name]
+      properties:
+        supplier_name:
+          type: string
+        postal_code:
+          type: string
+        address:
+          type: string
+        phone_number:
+          type: string
+        email:
+          type: string
+        is_active:
+          type: boolean
+          default: true
+    Supplier:
+      allOf:
+        - $ref: "#/components/schemas/SupplierInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    MenuInput:
+      type: object
+      required: [menu_name, category, standard_price, tax_category]
+      properties:
+        menu_name:
+          type: string
+        category:
+          type: string
+        standard_price:
+          type: number
+        tax_category:
+          $ref: "#/components/schemas/TaxCategory"
+        is_active:
+          type: boolean
+          default: true
+    Menu:
+      allOf:
+        - $ref: "#/components/schemas/MenuInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    PurchaseDetailInput:
+      type: object
+      required: [item_id, quantity, unit_price, amount, tax_rate]
+      properties:
+        item_id:
+          type: integer
+          format: int64
+        quantity:
+          type: number
+        unit_price:
+          type: number
+        amount:
+          type: number
+        tax_rate:
+          type: number
+          description: "登録時点で適用された税率のスナップショット（例: 0.08, 0.10）。税率マスタが後日改定されても値は変わらない"
+    PurchaseDetail:
+      allOf:
+        - $ref: "#/components/schemas/PurchaseDetailInput"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+
+    PurchaseInput:
+      type: object
+      required:
+        [
+          supplier_id,
+          purchase_date,
+          subtotal,
+          tax_amount,
+          total_amount,
+          details,
+        ]
+      properties:
+        supplier_id:
+          type: integer
+          format: int64
+        purchase_date:
+          type: string
+          format: date
+          description: JST固定
+        delivery_date:
+          type: string
+          format: date
+        subtotal:
+          type: number
+        tax_amount:
+          type: number
+          description: >-
+            明細ごとにamount×tax_rateを端数処理せず算出→同一tax_rateの明細でグルーピングして端数処理せず合計→
+            グループごとに端数処理（切り捨て）→各グループの端数処理後の値を合計、の順で計算した値。
+            インボイス制度が「1つの適格請求書につき税率ごとに1回の端数処理」を義務付けているため、
+            明細ごとに都度端数処理してから合計する実装は行わない。計算・整合性検証はクライアント側の責務でありサーバー側では検証しない
+        total_amount:
+          type: number
+        remarks:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: "#/components/schemas/PurchaseDetailInput"
+    PurchaseHeader:
+      allOf:
+        - $ref: "#/components/schemas/PurchaseInput"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            purchase_no:
+              type: string
+              readOnly: true
+              description: "サーバー採番（例: PO-20260712-0001）。PUTで日付を変更しても採番し直さない"
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    Purchase:
+      allOf:
+        - $ref: "#/components/schemas/PurchaseHeader"
+        - type: object
+          properties:
+            details:
+              type: array
+              items:
+                $ref: "#/components/schemas/PurchaseDetail"
+
+    SalesDetailInput:
+      type: object
+      required: [menu_id, quantity, unit_price, amount, tax_rate]
+      properties:
+        menu_id:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+        unit_price:
+          type: number
+        amount:
+          type: number
+        tax_rate:
+          type: number
+          description: "登録時点で適用された税率のスナップショット（例: 0.08, 0.10）。税率マスタが後日改定されても値は変わらない"
+    SalesDetail:
+      allOf:
+        - $ref: "#/components/schemas/SalesDetailInput"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+
+    SalesInput:
+      type: object
+      required:
+        [
+          sales_datetime,
+          business_date,
+          subtotal,
+          tax_amount,
+          total_amount,
+          payment_method,
+          details,
+        ]
+      properties:
+        sales_datetime:
+          type: string
+          format: date-time
+          description: JST固定
+        business_date:
+          type: string
+          format: date
+          description: 営業日（JST固定）。深夜営業などで日付をまたぐ取引も、実際の営業日をクライアントが指定する
+        table_no:
+          type: string
+        customer_count:
+          type: integer
+          default: 1
+        subtotal:
+          type: number
+        tax_amount:
+          type: number
+          description: >-
+            明細ごとにamount×tax_rateを端数処理せず算出→同一tax_rateの明細でグルーピングして端数処理せず合計→
+            グループごとに端数処理（切り捨て）→各グループの端数処理後の値を合計、の順で計算した値。
+            インボイス制度が「1つの適格請求書につき税率ごとに1回の端数処理」を義務付けているため、
+            明細ごとに都度端数処理してから合計する実装は行わない。計算・整合性検証はクライアント側の責務でありサーバー側では検証しない
+        discount_amount:
+          type: number
+          default: 0
+        total_amount:
+          type: number
+        payment_method:
+          type: string
+        remarks:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: "#/components/schemas/SalesDetailInput"
+    SalesHeader:
+      allOf:
+        - $ref: "#/components/schemas/SalesInput"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            sales_no:
+              type: string
+              readOnly: true
+              description: "サーバー採番（例: SO-20260712-0001）。PUTで日付を変更しても採番し直さない"
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    Sales:
+      allOf:
+        - $ref: "#/components/schemas/SalesHeader"
+        - type: object
+          properties:
+            details:
+              type: array
+              items:
+                $ref: "#/components/schemas/SalesDetail"
+
+    TaxCategory:
+      type: string
+      enum: [STANDARD, REDUCED, EXEMPT]
+      description: 標準税率/軽減税率/非課税。消費税法で定まる固定区分のため独立マスタにはせず、ENUM値として持つ
+
+    TaxRateInput:
+      type: object
+      required: [tax_category, description, rate, valid_from]
+      properties:
+        tax_category:
+          $ref: "#/components/schemas/TaxCategory"
+        description:
+          type: string
+          description: "税区分の概要（例: 標準税率, 軽減税率(食品等), 非課税）"
+        rate:
+          type: number
+          description: "税率（例: 0.10, 0.08, 0）"
+        valid_from:
+          type: string
+          format: date
+        valid_to:
+          type: string
+          format: date
+          description: 未設定の場合は現在も有効
+    TaxRate:
+      allOf:
+        - $ref: "#/components/schemas/TaxRateInput"
+        - type: object
+          properties:
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    TaxRateUpdateInput:
+      type: object
+      required: [description, rate]
+      description: tax_category・valid_fromはパスパラメータで指定するため含めない
+      properties:
+        description:
+          type: string
+        rate:
+          type: number
+        valid_to:
+          type: string
+          format: date
