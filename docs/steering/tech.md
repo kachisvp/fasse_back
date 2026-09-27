@@ -23,22 +23,34 @@
 | test | 自動テスト(`gradlew.bat test`) | ローカルの MySQL 8.4、データベース `fasse_test` | テスト内で生成した鍵ペア |
 | dev / stg | AWS(Fargate + Aurora)。`fasse_infra` の環境名に合わせる | Aurora MySQL Serverless v2 | `fasse_infra` の stg と同じ公開鍵 PEM |
 
-- 環境は Spring Profile(`local` / `test` / `aws`)で切り替える。dev / stg の差分は環境変数で与える
+- 環境は Spring Profile(`local` / `test` / `aws`)で切り替える
 - テストはデータを削除・投入するため、`local` とは別のデータベース(`fasse_test`)を使う
 - ローカル(MySQL 8.4)と Aurora(MySQL 8.0 互換)のバージョン差があるため、SQL・DDL は両方で動く構文に限る
-- 環境ごとに変わる値・機密情報は `application.yaml` に直接書かず、環境変数で与える
 
-| 環境変数 | 内容 |
+### 設定値・機密情報の与え方
+
+| 環境 | 設定ファイル | 機密情報(DB 接続情報等)の与え方 |
+|---|---|---|
+| local | `application-local.yaml` | ファイルに直接記載する |
+| test | `application-test.yaml` | ファイルに直接記載する |
+| dev / stg | `application.yaml`(`aws` プロファイル) | 環境変数。Secrets Manager から ECS タスク定義経由で注入する |
+
+- `application-*.yaml` は `.gitignore` の対象とし、リポジトリに含めない。各開発者が `README.md` の手順で作成する
+- `application.yaml` はリポジトリに含める。機密情報を直接書かず、環境変数の参照(`${...}`)のみを記載する。`application-local.yaml` / `application-test.yaml` はこれを上書きする
+- `aws` プロファイル用の設定ファイルは作らない(`.gitignore` の対象のためコンテナイメージに含まれない)。`aws` プロファイルはログの出力形式の切り替え(`logback-spring.xml`)に用いる
+- CI でテストを実行する場合は、CI のシークレットから `application-test.yaml` を生成する(CI の構築は別仕様)
+
+| 環境変数(dev / stg) | 内容 |
 |---|---|
-| `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | 接続先 DB。AWS 上は Secrets Manager から ECS タスク定義経由で注入する |
-| `TEST_DB_URL` / `TEST_DB_USERNAME` / `TEST_DB_PASSWORD` | テスト用 DB(`fasse_test`) |
+| `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | 接続先 DB |
 | `JWT_PUBLIC_KEY_PEM` | KMS 公開鍵(PEM 文字列)。未設定の場合、全 API が 401 を返す(フェイルクローズ) |
 | `CORS_ALLOWED_ORIGINS` | CORS で許可するオリジン(カンマ区切り) |
+| `LOG_LEVEL` | ログレベル(既定 `INFO`) |
 
 ### ローカル開発での JWT
 
 - 本リポジトリは JWT を発行しない。ローカル開発では `fasse_infra` の stg 環境の `POST /auth/token`(AccessKey 経路)で JWT を取得し、`Authorization: Bearer <JWT>` を付けて呼び出す(有効期限 30 日)
-- 公開鍵 PEM は秘密情報ではないため、`fasse_infra/jwt_public_key.pem` の内容を `JWT_PUBLIC_KEY_PEM` に設定してよい
+- `fasse_infra/jwt_public_key.pem` の内容を `application-local.yaml` の `fasse.jwt.public-key-pem` に記載する
 - 自動テストでは、テストコード内で RSA 鍵ペアを生成して JWT を署名する(AWS への接続は不要)
 
 ## 3. 技術方針

@@ -276,10 +276,16 @@ install 時の[_任意のパスワード_]を入力
 ```
 create user admin identified by '_任意のパスワード_';
 create database fasse;
+create database fasse_test;
 grant all on fasse.* to admin;
-grant select, insert on fasse.* to admin;
+grant all on fasse_test.* to admin;
 quit
 ```
+
+- [fasse]: ローカル起動(local プロファイル)で使うデータベース
+- [fasse_test]: 自動テスト(test プロファイル)で使うデータベース。テストのたびにデータを削除・投入するため、[fasse]とは分ける
+- テーブルはアプリケーション起動時・テスト開始時に Flyway が作成するため、ここではデータベースの作成と権限付与のみを行う
+- Flyway がテーブルを作成するため、[admin]には両データベースへの全権限を付与する
 
 **MySQL 8.4 では[mysql_native_password]認証が既定で無効のため、ユーザーは[caching_sha2_password]で作成される。
 古いドライバ/ツールで接続できない場合は、ドライバを最新版に更新すること**
@@ -345,16 +351,52 @@ VSCode を再起動
 [fasse_back]プロジェクトを[Git Clone]
 [fasse_back]プロジェクトを[Visual Studio Code]で開く
 
-#### application.yaml 設定
+#### application-*.yaml 設定
 
-[src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
-以下を修正
+[src/main/resources/application-*.yaml]は DB のパスワード等を直接記載するため、[.gitignore]の対象としてリポジトリに含めていない
+以下の 2 ファイルを[src/main/resources/]に作成する
+
+**作成したファイルはコミットしないこと**
+
+[application-local.yaml]: ローカル起動用
 
 ```
-_dbname_: fasse
-_username_: admin
-_password_: [_任意のパスワード_]
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/fasse?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+    username: admin
+    password: _任意のパスワード_
+
+fasse:
+  jwt:
+    # fasse_infra/jwt_public_key.pem の内容を記載する
+    public-key-pem: |
+      -----BEGIN PUBLIC KEY-----
+      _fasse_infra/jwt_public_key.pem の内容_
+      -----END PUBLIC KEY-----
+  cors:
+    allowed-origins: http://localhost:5000
 ```
+
+[application-test.yaml]: 自動テスト用
+
+```
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/fasse_test?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+    username: admin
+    password: _任意のパスワード_
+
+fasse:
+  jwt:
+    # テストではテストコード内で生成した鍵ペアの公開鍵を設定するため空とする
+    public-key-pem: ""
+  cors:
+    allowed-origins: http://localhost:5000
+```
+
+- [_任意のパスワード_]は database 作成時に[admin]に設定したパスワード
+- [public-key-pem]が未設定・不正の場合もアプリケーションは起動するが、全 API が 401 を返す
 
 [src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
 

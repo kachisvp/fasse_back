@@ -246,16 +246,14 @@ CREATE TABLE t_sales_detail (
 ## 4. 伝票番号の採番
 
 - 形式: `<PO|SO>-<基準日 YYYYMMDD>-<連番 4 桁ゼロ埋め>`(例: `PO-20260712-0001`)。連番が 9999 を超えた場合は桁を増やす
-- `t_slip_no_counter` に対し、伝票登録と同じトランザクション内で次の SQL を実行して連番を得る
+- `SlipNoMapper` に次の 2 メソッドを定義し、`SlipNoService` が伝票登録と同じトランザクション内で順に呼んで連番を得る(1 回の Mapper 呼び出しで複数の SQL を実行しないため、接続設定 `allowMultiQueries` は使わない)
 
-  ```sql
-  INSERT INTO t_slip_no_counter (counter_name, value)
-  VALUES (#{counterName}, LAST_INSERT_ID(1))
-  ON DUPLICATE KEY UPDATE value = LAST_INSERT_ID(value + 1);
+  | メソッド | SQL |
+  |---|---|
+  | `increment(counterName)` | `INSERT INTO t_slip_no_counter (counter_name, value) VALUES (#{counterName}, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE value = LAST_INSERT_ID(value + 1)` |
+  | `selectLastInsertId()` | `SELECT LAST_INSERT_ID()` |
 
-  SELECT LAST_INSERT_ID();
-  ```
-
+- `LAST_INSERT_ID()` は DB 接続ごとの値である。同じトランザクション内の Mapper 呼び出しは同じ接続を使うため、`selectLastInsertId()` は直前の `increment` で設定した値を返す
 - 行ロックはトランザクション終了まで保持されるため、同じ基準日の同時登録でも番号は重複しない。伝票登録がロールバックされた場合は連番も戻る
 
 ## 5. JSON・日付の扱い
@@ -320,23 +318,24 @@ CREATE TABLE t_sales_detail (
   - `local`: コンソール + ファイル(`logs/fasse_back.log`、日次ローテーション、7 日保持)。パターンに `requestId` / `userId` を含める
   - `aws`: 構造化ログ(JSON)を標準出力し、CloudWatch Logs に送る(保持期間はインフラ側で設定する)
   - `test`: コンソールのみ
-- ログレベルは既定で INFO。`LOG_LEVEL` 環境変数で変更できる
+- ログレベルは既定で INFO。`logging.level.root` で変更できる
 
 ### 8.2 CORS
 
-- `CORS_ALLOWED_ORIGINS` で許可するオリジンを指定する(例: `http://localhost:5000`, CloudFront のドメイン)
+- `fasse.cors.allowed-origins` で許可するオリジンを指定する(例: `http://localhost:5000`, CloudFront のドメイン)
 - 許可メソッド: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`。許可ヘッダ: `Authorization`, `Content-Type`。公開ヘッダ: `X-Request-Id`
 
 ### 8.3 設定値
 
-| プロパティ | 環境変数 | 既定値(local) |
-|---|---|---|
-| `spring.datasource.url` | `DB_URL` | `jdbc:mysql://localhost:3306/fasse?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true` |
-| `spring.datasource.username` / `password` | `DB_USERNAME` / `DB_PASSWORD` | 既定値なし |
-| `fasse.jwt.public-key-pem` | `JWT_PUBLIC_KEY_PEM` | 空(全 API が 401) |
-| `fasse.cors.allowed-origins` | `CORS_ALLOWED_ORIGINS` | `http://localhost:5000` |
+設定ファイルの役割は `docs/steering/tech.md` 2 節による。`application.yaml` は環境変数を参照し、`application-local.yaml` / `application-test.yaml` は値を直接記載して上書きする。
 
-- `test` プロファイルは `TEST_DB_URL` / `TEST_DB_USERNAME` / `TEST_DB_PASSWORD`(既定の URL は `jdbc:mysql://localhost:3306/fasse_test?...`)を使う
+| プロパティ | `application.yaml`(dev / stg) | `application-local.yaml` | `application-test.yaml` |
+|---|---|---|---|
+| `spring.datasource.url` | `${DB_URL}` | `jdbc:mysql://localhost:3306/fasse?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true` | `jdbc:mysql://localhost:3306/fasse_test?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true` |
+| `spring.datasource.username` / `password` | `${DB_USERNAME}` / `${DB_PASSWORD}` | 開発者ごとの値 | 開発者ごとの値 |
+| `fasse.jwt.public-key-pem` | `${JWT_PUBLIC_KEY_PEM:}`(未設定なら全 API が 401) | `fasse_infra/jwt_public_key.pem` の内容 | 空(テストコードで生成した公開鍵を設定する) |
+| `fasse.cors.allowed-origins` | `${CORS_ALLOWED_ORIGINS}` | `http://localhost:5000` | `http://localhost:5000` |
+| `logging.level.root` | `${LOG_LEVEL:INFO}` | 継承 | 継承 |
 
 ## 9. Lambda 実装と意図的に異なる点
 
@@ -360,9 +359,19 @@ CREATE TABLE t_sales_detail (
 | Service | JUnit 5 + Mockito(Mapper をモック) | 既存値の維持、既定値、404、参照先確認、伝票番号の組み立て、明細の全洗い替えの呼び出し順 |
 | Repository | `@MybatisTest` + テスト用 DB(MySQL 8.4、`fasse_test`) | 各 SQL の結果、日付範囲検索、採番 SQL の連番・日付単位のリセット、一意制約 |
 | Controller | `@WebMvcTest` + Spring Security | 6.1 節の各 400 条件、レスポンス形式(スネークケース・日時形式)、ステータスコード、JWT あり/なし |
-| 結合 | `@SpringBootTest(RANDOM_PORT)` + テスト用 DB | 各リソースの CRUD を HTTP で一通り実行、トランザクションのロールバック(明細登録失敗時にヘッダが残らない)、500 の応答形式 |
+| 結合 | `@SpringBootTest(RANDOM_PORT)` + テスト用 DB | 各リソースの CRUD を HTTP で一通り実行、トランザクションのロールバック(10.1 節)、500 の応答形式 |
 
-### 10.1 テストデータ
+### 10.1 ロールバックの検証
+
+- 入力検証と参照先マスタの確認により、通常の入力では明細の登録は失敗しない。そのため、テストで明細の登録失敗を人為的に起こす
+- 結合テストで伝票 Mapper(`PurchaseMapper` / `SalesMapper`)を `@MockitoSpyBean` に差し替え、明細の登録メソッドだけが `RuntimeException` を投げるよう設定する(他のメソッドは実際の SQL を実行する)
+- `POST` で明細を含む伝票を登録し、次を検証する
+  - 500 と `{ "message": "Internal Server Error", "requestId" }` が返る
+  - ヘッダ・明細が DB に残っていない
+  - `t_slip_no_counter` の値が登録前と同じである(採番も戻る)
+- `PUT` でも同様に、ヘッダ・明細が更新前の状態のまま残ることを検証する
+
+### 10.2 テストデータ
 
 - `src/test/resources/testdata/<テーブル名>.csv` に各テーブル 5 件程度を置く(形式は `docs/steering/structure.md` 5 節)
   - `m_item.csv`, `m_supplier.csv`, `m_menu.csv`, `m_tax_rate.csv`, `t_slip_no_counter.csv`, `t_purchase_header.csv`, `t_purchase_detail.csv`, `t_sales_header.csv`, `t_sales_detail.csv`

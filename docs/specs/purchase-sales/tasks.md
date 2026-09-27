@@ -4,16 +4,16 @@
 
 ## 仕様の承認
 
-- [ ] `docs/steering/` のレビュー・承認
-- [ ] requirements.md / design.md / openapi.yaml のレビュー・承認
-- [ ] `docs/specs/authentication/` のレビュー・承認
+- [x] `docs/steering/` のレビュー・承認
+- [x] requirements.md / design.md / openapi.yaml のレビュー・承認
+- [x] `docs/specs/authentication/` のレビュー・承認
 
 ## 1. プロジェクト基盤
 
 - [ ] T-101: 試作コードを削除する(`RestApiSampleController`、`fasse/`、`user/`、`foodcomposition/`、関連 Mapper XML、`src/test/resources/schema.sql` / `data.sql`)
 - [ ] T-102: 食品成分表の DDL を `src/test/resources/ddl/m_food_composition.sql` に移す(`FoodCompositionTable.csv` はそのまま残す)
 - [ ] T-103: `build.gradle` を更新する(Spring Boot 3.5 系、thymeleaf と個別指定の jackson-databind を削除、validation / security / oauth2-resource-server / flyway-mysql / JaCoCo を追加)
-- [ ] T-104: `application.yaml` とプロファイル別設定(`local` / `test` / `aws`)を作成する。機密情報は環境変数から読む
+- [ ] T-104: `application.yaml`(環境変数の参照のみ)と `application-local.yaml` / `application-test.yaml`(値を直接記載、`.gitignore` 対象)を作成する(design.md 8.3 節)
 - [ ] T-105: `.gitignore` に `logs/` を追加する
 - [ ] T-106: Flyway マイグレーション `V1__create_purchase_sales_tables.sql` を作成する(design.md 2.1 節)
 - [ ] T-107: `JacksonConfig`(スネークケース、未定義項目の無視、型変換の無効化、`BigDecimal`、日時形式)を実装する
@@ -25,7 +25,7 @@
 ### テスト
 
 - [ ] T-151: テスト用 DB(`fasse_test`)の接続設定と `TestDataLoader`(CSV 投入)を作成する
-- [ ] T-152: 全テーブルのテストデータ CSV(各 5 件程度)を作成する(design.md 10.1 節)
+- [ ] T-152: 全テーブルのテストデータ CSV(各 5 件程度)を作成する(design.md 10.2 節)
 - [ ] T-153: `GlobalExceptionHandler` と `JacksonConfig` のテスト(400 の各 `message`、型変換の拒否、500 で内部情報を返さないこと)
 - [ ] T-154: `RequestIdFilter` のテスト(`X-Request-Id` の付与、エラーレスポンスの `requestId` と一致すること)
 
@@ -53,7 +53,7 @@
 
 ## 4. 伝票(仕入・売上)
 
-- [ ] T-401: 伝票番号採番(`SlipNoService` / `SlipNoMapper`)を実装する
+- [ ] T-401: 伝票番号採番(`SlipNoService` / `SlipNoMapper`)を実装する(`increment` → `selectLastInsertId` を同一トランザクションで呼ぶ。design.md 4 節)
 - [ ] T-402: 仕入伝票(`purchase`)の Entity / DTO / Mapper / Service / Controller を実装する(参照先マスタの確認、明細の全洗い替え)
 - [ ] T-403: 売上伝票(`sales`)を同様に実装する(`customer_count` / `discount_amount` の既定値、`sales_datetime` の JST 正規化)
 
@@ -67,10 +67,10 @@
 ## 5. 結合テスト・品質
 
 - [ ] T-501: 全リソースの CRUD を HTTP で実行する結合テストを作成する(JWT あり/なし)
-- [ ] T-502: 明細の登録に失敗した場合にヘッダ・採番が残らないこと(ロールバック)の結合テストを作成する
+- [ ] T-502: 明細の登録に失敗した場合にヘッダ・明細・採番が残らないこと(ロールバック)の結合テストを作成する(`@MockitoSpyBean` で明細の登録を失敗させる。design.md 10.1 節)
 - [ ] T-503: JaCoCo のレポートを設定し、カバレッジが 80% 以上であることを確認する(`common/config` を除く)
 
 ## 6. 動作確認・ドキュメント
 
 - [ ] T-601: ローカル起動し、`fasse_infra/postman/` のコレクションを `http://localhost:8080` に向けて全 API を確認する
-- [ ] T-602: `README.md` をセットアップ手順(Windows での JDK 21・MySQL 8.4 のインストール、`fasse` / `fasse_test` の作成、環境変数、JWT の取得方法、起動・テストコマンド)。試作用の手順(`schema.sql` / `data.sql` の投入、`/users` の確認等)は削除するに更新する
+- [ ] T-602: `README.md` をセットアップ手順(Windows での JDK 21・MySQL 8.4 のインストール、`fasse` / `fasse_test` の作成と権限付与、`application-local.yaml` / `application-test.yaml` の作成、JWT の取得方法、起動・テストコマンド)に更新する。試作用の手順(`schema.sql` / `data.sql` の投入、`/users` の確認等)は削除する

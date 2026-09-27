@@ -36,7 +36,7 @@ sequenceDiagram
   - `oauth2ResourceServer().jwt()` で `JwtDecoder` を使う
   - `authenticationEntryPoint` / `accessDeniedHandler` を独自実装し、401 を `{ "message", "requestId" }` 形式で返す
 - `JwtDecoder`(`common/security/JwtDecoderConfig`)
-  - `JWT_PUBLIC_KEY_PEM`(プロパティ `fasse.jwt.public-key-pem`)を起動時に `RSAPublicKey` へ変換し、`NimbusJwtDecoder.withPublicKey(key).signatureAlgorithm(RS256)` で生成する
+  - プロパティ `fasse.jwt.public-key-pem`(dev / stg は環境変数 `JWT_PUBLIC_KEY_PEM`、local は `application-local.yaml`)を起動時に `RSAPublicKey` へ変換し、`NimbusJwtDecoder.withPublicKey(key).signatureAlgorithm(RS256)` で生成する
   - 検証項目: 署名、`alg`=RS256、`exp`(必須)。時刻の許容誤差(clock skew)は 0 秒とする(Lambda と同じ判定にするため)
   - `iss` / `aud` は検証しない(Lambda と同じ。発行者は鍵で限定される)
   - 公開鍵が未設定・不正な場合は、起動を止めずに「常に検証失敗とする `JwtDecoder`」を登録し、WARN ログを出力する(フェイルクローズ)

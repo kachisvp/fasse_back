@@ -24,8 +24,8 @@ fasse_back/
     │   │       ├── dto/                  # request / response DTOs
     │   │       └── entity/               # DB row objects
     │   └── resources/
-    │       ├── application.yaml
-    │       ├── application-<profile>.yaml
+    │       ├── application.yaml              # common settings (env var references only, committed)
+    │       ├── application-<profile>.yaml    # local / test only, git-ignored (see README.md)
     │       ├── logback-spring.xml
     │       ├── db/migration/             # Flyway migrations (V<n>__<desc>.sql)
     │       └── com/example/fasse_back/<feature>/repository/  # MyBatis mapper XML

@@ -27,7 +27,7 @@ JWT 発行基盤の要件は `fasse_infra` の `docs/specs/authentication/` を�
 ## 非機能要件
 
 - NFR-A01: トークンの値・公開鍵の値をログに出力しない
-- NFR-A02: 公開鍵は環境変数で与え、リポジトリに含めない(公開鍵自体は秘密情報ではないが、環境ごとの運用値として扱う)
+- NFR-A02: 公開鍵はリポジトリに含めない(公開鍵自体は秘密情報ではないが、環境ごとの運用値として扱う)。dev / stg は環境変数、local は `.gitignore` 対象の `application-local.yaml` で与える(`docs/steering/tech.md` 2 節)
 
 ## 受け入れ基準
 
