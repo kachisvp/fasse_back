@@ -20,8 +20,8 @@ VSCodeを管理者権限で起動すること
 
 ```
 mysql --version
-net start MySQL80
-net stop MySQL80
+net start MySQL84
+net stop MySQL84
 mysql -u root -p -e "select version();" 2>&1
 ```
 
@@ -39,267 +39,6 @@ mysql -u root -p -e "select version();" 2>&1
 ```
 > Developer: Reload Window
 ```
-
-</details>
-
-<details>
-
-<summary>Mac環境構築</summary>
-
-# Mac 環境構築
-
-## Google Chrome
-
-Google Chrome がインストールされていないと、[flutter doctor -v]が終了しないため、インストールする
-
-## Git
-
-### install
-
-brew install git
-
-### Terminal を開き、version を確認
-
-git --version
-
-### Git 初期設定
-
-git config --global user.name "Namae Myoji"
-git config --global user.email "_username_@example.com"
-
-## SourceTree
-
-### install
-
-公式サイトからダウンロード、インストール
-
-### Git Credential Manager
-
-[Git Credential Manager]を install しないと、push するのに token が必要になる
-[Git for Windows]の場合、[Git]の install 時に一緒に install される
-
-```
-brew install --cask git-credential-manager
-```
-
-## Flutter SDK
-
-### install
-
-[/Users/_username_/dev/flutter]となる様に保存
-
-### PATH に追加
-
-```
-vi ~/.zshrc
-export PATH=${HOME}/dev/flutter/bin:${PATH}
-source ~/.zshrc
-```
-
-### Flutter が利用可能になったことを確認
-
-Terminal を開き、以下のコマンドを実行
-
-```
-flutter --version
-flutter doctor -v
-```
-
-**10 分程度、何も表示されずに処理に時間が掛かる可能性あり**
-
-## OpenJDK
-
-### install
-
-brew search openjdk
-brew install openjdk@21
-
-### PATH に追加
-
-```
-vi ~/.zshrc
-export JAVA_HOME=/usr/local/opt/openjdk@21
-export PATH=${PATH}:/usr/local/opt/openjdk@21/bin
-source ~/.zshrc
-```
-
-### Terminal を開き、version を確認
-
-java --version
-
-## Visual Studio Code
-
-### install
-
-すべてデフォルトでインストール
-
-### システム環境変数に以下を追加
-
-```
-vi ~/.zshrc
-export SPRING_PROFILES_ACTIVE_local
-source ~/.zshrc
-```
-
-### Visual Studio Code Settings
-
-~~Java 設定の必要があるかを確認する~~
-
-### VSCode Extensions
-
-[Visual Studio Code] > [左側の Extensions]を押下
-[Search Extensions in Marketplace]で以下を検索して[install]を押下
-
-- Flutter
-- Extension Pack for Java
-- Gradle for Java
-- Spring Boot Extension Pack
-
-## MySQL
-
-### install
-
-defaul では MySQL9.2 が install されてしまうため、version を指定
-
-```
-brew search mysql
-
-brew install mysql@8.4
-brew info mysql
-```
-
-### PATH に追加
-
-```
-vi ~/.zshrc
-export PATH=/usr/local/opt/mysql@8.4/bin:${PATH}
-source ~/.zshrc
-```
-
-### Terminal を開き、version を確認
-
-mysql --version
-
-### command
-
-mysql.server start
-mysql.server restart
-mysql.server stop
-
-### database を作成
-
-初回はパスワードなしでログイン
-
-```
-mysql -uroot
-set password for root@localhost='_任意のパスワード_';
-quit
-```
-
-2 回目以降は[_任意のパスワード_]を入力
-
-```
-mysql -u root -p
-create user admin identified by '_任意のパスワード_';
-create database fasse;
-grant all on fasse.* to admin;
-grant select, insert on fasse.* to admin;
-quit
-```
-
-### VSCode Extensions
-
-[Visual Studio Code] > [左側の Extensions]を押下
-[Search Extensions in Marketplace]で以下を検索して[install]を押下
-
-- MySQL Shell for VS Code
-
-左の[MySQL Shell for VS Code]を押下
-[New Connection]を押下
-以下を入力して[OK]を押下
-
-```
-Caption: fasse
-Username: admin
-```
-
-左の[DATABASE CONNECTION] > [fasse]を右クリック > [Open New Database Connection]を押下
-install 時の[_任意のパスワード_]を入力
-
-### [fasse]の[DB Notebook]が開いたらバージョンを確認
-
-以下を入力し、[Cmd + Enter]を押下
-
-```
-select version();
-```
-
-### 動作確認用の schema, data を投入
-
-以下を入力し、[Cmd + Enter]を押下
-
-```
-use fasse
-[./src/test/resources/schema.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
-[./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
-```
-
-## Visual Studio Code 動作確認手順
-
-### SpringBoot
-
-[fasse_back]プロジェクトを[Git Clone]
-[fasse_back]プロジェクトを[Visual Studio Code]で開く
-
-#### application.yaml 設定
-
-[src/main/resources/application.yaml]をコピーして[src/main/resources/application-local.yaml]を作成
-以下を修正
-
-```
-_dbname_: fasse
-_username_: admin
-_password_: [_任意のパスワード_]
-```
-
-#### gradlew に実行権限を付与
-
-```
-chmod +x ./gradlew
-```
-
-[src/main/java/com/example/fasse_back/FasseBackApplication.java]をデバッグ実行
-[http://localhost:8080/users]にアクセスし、[m_user]から JSON データを取得することを確認
-
-### Flutter
-
-[fasse_front]プロジェクトを[Git Clone]
-[fasse_front]プロジェクトを[Visual Studio Code]で開く
-[Ctrl + @]を押下して[Terminal]を開く
-以下のコマンドを実行する
-
-```
-flutter clean
-flutter pub get
-flutter build web
-flutter run -d chrome
-```
-
-#### CORS 対応
-
-Flutter-SpringBoot をローカル環境で連携すると、[CORS: Cross-Origin Resource Sharing]で止められるため、開発用に以下を修正
-
-[~/dev/flutter/packages/flutter_tools/lib/src/web/chrome.dart]を開く
-
-```
-      '--disable-extensions',
-      '--disable-web-security', // 開発用にこの行を追加
-```
-
-[~/dev/flutter/bin/cache/flutter_tools.stamp]を削除
-**ビルド時に再作成されるファイルのため、削除しても問題ない**
-
-Chrome で Flutter アプリが動作することを確認
 
 </details>
 
@@ -413,22 +152,115 @@ SPRING_PROFILES_ACTIVE=local
 - Gradle for Java
 - Spring Boot Extension Pack
 
-## MySQL
+## MySQL 8.4 LTS
+
+### MySQL 8.0 uninstall
+
+MySQL 8.0がインストールされている場合、以下の手順でuninstallする
+
+#### サービス停止
+
+コマンドプロンプトを管理者権限で起動し、以下のコマンドを実行
+
+```
+net stop MySQL80
+```
+
+> [MySQL80 サービスは正常に停止されました。]が表示されることを確認
+
+#### uninstall
+
+[コントロールパネル]を開き、以下の「MySQL」とつくものをすべてアンインストール
+
+- MySQL Server 8.0
+- MySQL Installer - Community
+- MySQL Shell、MySQL Workbench、MySQL Router、Connector 類（入っていれば）
+
+#### フォルダ削除
+
+以下のフォルダを削除
+
+- C:\ProgramData\MySQL
+
+#### サービスが消えたかを確認
+
+[Win + R] > [services.msc]を入力 > [OK]を押下
+
+> [MySQL80]が残っている場合、以下を実行
+
+コマンドプロンプトを管理者権限で起動し、以下のコマンドを実行
+
+```
+sc delete MySQL80
+```
+
+[サービス]にて、左上の[最新の情報に更新]を押下
+
+> サービスから[MySQL80]が削除されたことを確認
+
+#### 環境変数 PATH から削除
+
+[Win + R] > [sysdm.cpl]を入力 > [OK]を押下
+[詳細設定] > [環境変数]を押下
+[システム環境変数] > [Path]を選択 > [編集]を押下
+[C:\Program Files\MySQL\MySQL Server 8.0\bin]を選択 > [削除]を押下
+
+PCを再起動
+
+### download
+
+[https://dev.mysql.com/downloads/mysql/]を開く
+[Select Version]: [8.4.x LTS]を選択
+[Select Operating System]: [Microsoft Windows]を選択
+[Windows (x86, 64-bit), MSI Installer]の[Download]を押下
+[No thanks, just start my download.]を押下して[mysql-8.4.x-winx64.msi]を保存
+
+**[VC_redist.x64.exe](Microsoft Visual C++ 再頒布可能パッケージ)が未インストールの環境では、先にインストールが必要**
 
 ### install
 
-[Server only]を選択、その他すべてデフォルトでインストール
-[MySQL Root Password], [Repeat Password]: [_任意のパスワード_]を入力
-[Execute]後、[Finish]ボタンが表示されたら、
-[The configuration for MySQL Server 8.0.39 was successful.]と表示されたことを確認
+[mysql-8.4.x-winx64.msi]を実行
+ライセンスに同意して[Next]を押下
+[Choose Setup Type]: [Typical]を選択、その他すべてデフォルトでインストール
+インストール完了画面で[Run MySQL Configurator]にチェックが入っていることを確認して[Finish]を押下
+
+### MySQL Configurator で初期設定
+
+[MySQL Configurator]が起動したら、以下の通り設定する
+
+- [Welcome]: [Next]
+- [Data Directory]: [C:\ProgramData\MySQL\MySQL Server 8.4\]であることを確認 > [Next]
+- [Type and Networking]: [Config Type]は[Development Computer]、[Port]は[3306]のまま[Next]
+- [Accounts and Roles]: [MySQL Root Password], [Repeat Password]: [_任意のパスワード_]を入力して[Next]
+- [Windows Service]: [Windows Service Name]が[MySQL84]であることを確認、その他デフォルトで[Next]
+- [Server File Permissions]: [Next]
+- [Sample Databases]: チェックを入れずに[Next]
+- [Apply Configuration]で[Execute]を押下
+- すべての項目にチェックが付き、[Next] > [Finish]
+
+> [The configuration for MySQL Server 8.4.x was successful.]と表示されたことを確認
+
+**[MySQL Configurator]は後から再実行可能
+[スタートメニュー] > [MySQL] > [MySQL Configurator 8.4]**
 
 ### システム環境変数に以下を追加
 
-PATH=%PATH%;"C:\Program Files\MySQL\MySQL Server 8.0\bin"
+> [PATH=%PATH%;"C:\Program Files\MySQL\MySQL Server 8.4\bin"]となる様に追加する
+
+[Win + R] > [sysdm.cpl]を入力 > [OK]を押下
+[詳細設定] > [環境変数]を押下
+[システム環境変数] > [Path]を選択 > [編集]を押下
+[新規]を押下 > [C:\Program Files\MySQL\MySQL Server 8.4\bin]を入力 > [削除]を押下
+[%JAVA_HOME%\bin]の下に配置されるまで[上へ]を押下
+[環境変数名]: [OK]を押下
+[環境変数]: [OK]を押下
+[システムのプロパティ]: [OK]を押下
 
 ### コマンドプロンプトを開き、version を確認
 
 mysql --version
+
+> [mysql Ver 8.4.x for Win64 on x86_64 (MySQL Community Server - GPL)]が表示されることを確認
 
 ### 引き続きコマンドプロンプトで database を作成
 
@@ -449,6 +281,9 @@ grant select, insert on fasse.* to admin;
 quit
 ```
 
+**MySQL 8.4 では[mysql_native_password]認証が既定で無効のため、ユーザーは[caching_sha2_password]で作成される。
+古いドライバ/ツールで接続できない場合は、ドライバを最新版に更新すること**
+
 ### VSCode Extensions
 
 [Visual Studio Code] > [左側の Extensions]を押下
@@ -458,17 +293,6 @@ quit
 
 左の[MySQL Shell for VS Code]を押下
 [DB Connection Overview]を押下
-右下に[Run Welcome Wizard]が表示されたら押下
-
-```
-The MySQL Shell for VS Code extension cannot run because the web certificate is not installed. Do you want to run the Welcome Wizard to install it?
-Source: MySQL Shell for VS Code
-```
-
-指示に従って[VC_redist.x64.exe]のインストールが必要な環境もある
-Wizard に従って証明書をインストール
-VSCode を再起動
-左の[MySQL Shell for VS Code]を押下
 [New Connection]を押下
 以下を入力して[OK]を押下
 
@@ -488,15 +312,7 @@ install 時の[_任意のパスワード_]を入力
 select version();
 ```
 
-### 動作確認用の schema, data を投入
-
-以下を入力し、[Cmd + Enter]を押下
-
-```
-use fasse
-[./src/test/resources/schema.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
-[./src/test/resources/data.sql]を開く > 全選択 > 貼り付け > [Cmd + Enter]を押下
-```
+> [8.4.x]と表示されることを確認
 
 ## Visual Studio Code 動作確認手順
 
@@ -515,8 +331,14 @@ mysqld
 
 ```
 [Win + R > services.msc]を入力
-[MySQL80]を右クリック > [再起動]を押下
+[MySQL84]を右クリック > [再起動]を押下
 ```
+
+### [VC_redist.x64.exe]について
+
+指示に従って[VC_redist.x64.exe]のインストールが必要な環境もある
+Wizard に従って証明書をインストール
+VSCode を再起動
 
 ### SpringBoot
 
