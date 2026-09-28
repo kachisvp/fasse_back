@@ -18,4 +18,4 @@
 
 ## 動作確認
 
-- [ ] TASK-A21: `fasse_infra` の stg 環境で取得した JWT と `jwt_public_key.pem` を使い、ローカル起動した API に Postman でアクセスできることを確認する
+- [x] TASK-A21: `fasse_infra` の stg 環境で取得した JWT と `jwt_public_key.pem` を使い、ローカル起動した API に Postman でアクセスできることを確認する

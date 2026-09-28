@@ -72,5 +72,5 @@
 
 ## 6. 動作確認・ドキュメント
 
-- [ ] T-601: ローカル起動し、`fasse_infra/postman/` のコレクションを `http://localhost:8080` に向けて全 API を確認する
+- [x] T-601: ローカル起動し、`fasse_infra/postman/` のコレクションを `http://localhost:8080` に向けて全 API を確認する
 - [x] T-602: `README.md` をセットアップ手順(Windows での JDK 21・MySQL 8.4 のインストール、`fasse` / `fasse_test` の作成と権限付与、`application-local.yaml` / `application-test.yaml` の作成、JWT の取得方法、起動・テストコマンド)に更新する。試作用の手順(`schema.sql` / `data.sql` の投入、`/users` の確認等)は削除する
