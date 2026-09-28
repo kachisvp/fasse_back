@@ -46,6 +46,7 @@
 
 - `docs/specs/purchase-sales/`: 仕入管理・売上管理・消費税率マスタの WebAPI
 - `docs/specs/authentication/`: WebAPI 受口での JWT 検証
+- `docs/specs/local-seed-data/`: 開発用 DB へのテストデータ投入(開発環境向け)
 
 ## 5. 今後の拡張
 

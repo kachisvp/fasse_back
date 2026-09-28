@@ -76,6 +76,7 @@ gradlew.bat bootRun                           # SPRING_PROFILES_ACTIVE=local
 gradlew.bat test                              # unit + integration tests (requires local MySQL)
 gradlew.bat build                             # build with tests
 gradlew.bat jacocoTestReport                  # coverage report
+gradlew.bat seedLocal -Pconfirm=yes           # reset local DB (fasse) and load test data
 ```
 
 - 動作確認は Postman で行う。`fasse_infra/postman/` のコレクションを、ベース URL を `http://localhost:8080` に変えた環境で利用する

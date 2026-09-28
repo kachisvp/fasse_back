@@ -77,4 +77,5 @@ fasse_back/
   - 空欄は `NULL` として扱う
   - `created_at` / `updated_at` など DB の既定値に任せる列は省略してよい
 - FK の依存順(マスタ → ヘッダ → 明細)に投入する。投入処理はテスト用ユーティリティで共通化する
+- テストデータは開発用 DB(`fasse`)の確認用データとしても使う(`gradlew.bat seedLocal -Pconfirm=yes`。`docs/specs/local-seed-data/`)。変更する場合は、自動テストと開発時の確認の両方で自然な内容になるようにする
 - 食品成分表のテストデータ `src/test/resources/FoodCompositionTable.csv` と DDL `src/test/resources/ddl/m_food_composition.sql` は今後の拡張用に保持する(現時点ではテストから使用しない)
