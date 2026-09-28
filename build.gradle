@@ -85,3 +85,14 @@ tasks.named('jacocoTestCoverageVerification') {
 tasks.named('check') {
 	dependsOn tasks.named('jacocoTestCoverageVerification')
 }
+
+// 開発用 DB へのテストデータ投入(docs/specs/local-seed-data/design.md 5 節)
+// 実行例: gradlew.bat seedLocal -Pconfirm=yes
+tasks.register('seedLocal', JavaExec) {
+	group = 'application'
+	description = 'ローカル DB(fasse)の全データを削除し、src/test/resources/testdata/ を投入する'
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.example.fasse_back.support.seed.LocalSeedRunner'
+	systemProperty 'spring.profiles.active', 'local'
+	args(project.findProperty('confirm') ?: '')
+}

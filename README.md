@@ -28,6 +28,7 @@ mysql -u root -p -e "select version();" 2>&1
 # VSCode
 
 ```
+# キャッシュを使用せず最新の情報に更新
 ./gradlew --refresh-dependencies
 # ビルド(テスト・カバレッジ 80% の検証を含む)
 ./gradlew build
@@ -35,6 +36,8 @@ mysql -u root -p -e "select version();" 2>&1
 ./gradlew test
 # カバレッジレポート(build/reports/jacoco/test/html/index.html)
 ./gradlew jacocoTestReport
+# 開発用 DB(fasse)の全データを削除してテストデータを投入
+./gradlew seedLocal -Pconfirm=yes
 # ローカル起動(システム環境変数 SPRING_PROFILES_ACTIVE=local が必要)
 ./gradlew bootRun
 ```
@@ -358,7 +361,7 @@ VSCode を再起動
 [fasse_back]プロジェクトを[Git Clone]
 [fasse_back]プロジェクトを[Visual Studio Code]で開く
 
-#### application-*.yaml 設定
+#### application-\*.yaml 設定
 
 [src/main/resources/application-*.yaml]は DB のパスワード等を直接記載するため、[.gitignore]の対象としてリポジトリに含めていない
 以下の 2 ファイルを[src/main/resources/]に作成する
@@ -409,6 +412,22 @@ fasse:
 
 - 起動時に Flyway が[fasse]にテーブルを作成する(作成済みの場合は未適用のマイグレーションのみ適用する)
 - ログはコンソールと[logs/fasse_back.log]に出力される(日次ローテーション、7 日保持)
+
+#### 開発用データの投入(任意)
+
+[fasse]はテーブルのみの空の状態で始まるため、動作確認用にテストデータ([src/test/resources/testdata/])を投入できる
+
+```
+./gradlew seedLocal -Pconfirm=yes
+```
+
+**実行すると[fasse]の全データを削除してから投入する。登録済みのデータはすべて消えるため注意すること**
+
+- [-Pconfirm=yes]を付けない場合は、DB に接続せずに終了する
+- 接続先は[application-local.yaml]の設定。ホストが[localhost]以外の場合は実行されない
+- テーブルが未作成でも実行できる(投入前に Flyway がテーブルを作成する)
+- 投入後にアプリケーションから登録しても、伝票番号・id はテストデータと重複しない
+- 動作確認でデータが崩れた場合も、同じコマンドで元の状態に戻せる
 
 #### JWT の取得と API の呼び出し
 
