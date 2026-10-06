@@ -19,7 +19,7 @@
 
 | 環境 | 位置づけ | DB | JWT 公開鍵 |
 |---|---|---|---|
-| local | 開発者 PC(Windows)上での実行 | ローカルの MySQL 8.4、データベース `fasse` | `fasse_infra` の stg と同じ公開鍵 PEM |
+| local | 開発者 PC(Windows)上での実行 | ローカルの MySQL 8.4、データベース `fasse` | 不要(認証を行わない) |
 | test | 自動テスト(`gradlew.bat test`) | ローカルの MySQL 8.4、データベース `fasse_test` | テスト内で生成した鍵ペア |
 | dev / stg | AWS(Fargate + Aurora)。`fasse_infra` の環境名に合わせる | Aurora MySQL Serverless v2 | `fasse_infra` の stg と同じ公開鍵 PEM |
 
@@ -47,11 +47,11 @@
 | `CORS_ALLOWED_ORIGINS` | CORS で許可するオリジン(カンマ区切り) |
 | `LOG_LEVEL` | ログレベル(既定 `INFO`) |
 
-### ローカル開発での JWT
+### ローカル開発での認証
 
-- 本リポジトリは JWT を発行しない。ローカル開発では `fasse_infra` の stg 環境の `POST /auth/token`(AccessKey 経路)で JWT を取得し、`Authorization: Bearer <JWT>` を付けて呼び出す(有効期限 30 日)
-- `fasse_infra/jwt_public_key.pem` の内容を `application-local.yaml` の `fasse.jwt.public-key-pem` に記載する
-- 自動テストでは、テストコード内で RSA 鍵ペアを生成して JWT を署名する(AWS への接続は不要)
+- `local` プロファイルでは認証を行わない。`Authorization` ヘッダを付けずに API を呼び出せる(`docs/specs/authentication/` REQ-A08)
+- 認証を無効化できるのは `local` プロファイルのみ。dev / stg(`aws` プロファイル)では無効化できない
+- 本リポジトリは JWT を発行しない。JWT 検証の動作は自動テストで確認する。自動テストでは、テストコード内で RSA 鍵ペアを生成して JWT を署名する(AWS への接続は不要)
 
 ## 3. 技術方針
 

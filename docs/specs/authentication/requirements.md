@@ -2,18 +2,18 @@
 
 ## 背景・目的
 
-Fasse の WebAPI は全エンドポイントで JWT 認証を必須とする。JWT は `fasse_infra` の JWT 発行基盤(AccessKey 経路・Cognito 経路)が KMS 非対称鍵で署名した単一形式に統一されている。本仕様は、Spring Boot の WebAPI 受口で、`fasse_infra` の Lambda と同じ検証を行うための要件を定める。
+Fasse の WebAPI は全エンドポイントで JWT 認証を必須とする(開発者 PC 上の local プロファイルを除く)。JWT は `fasse_infra` の JWT 発行基盤(AccessKey 経路・Cognito 経路)が KMS 非対称鍵で署名した単一形式に統一されている。本仕様は、Spring Boot の WebAPI 受口で、`fasse_infra` の Lambda と同じ検証を行うための要件を定める。
 
 JWT 発行基盤の要件は `fasse_infra` の `docs/specs/authentication/` を参照する。
 
 ## スコープ
 
-- 対象: Spring Boot の WebAPI 受口での JWT 検証
-- 対象外: JWT の発行(AccessKey 照合、Cognito ID Token 検証、KMS 署名)。ローカル開発でも発行は行わず、`fasse_infra` の stg 環境で取得した JWT を使う
+- 対象: Spring Boot の WebAPI 受口での JWT 検証、および local プロファイルでの認証の無効化
+- 対象外: JWT の発行(AccessKey 照合、Cognito ID Token 検証、KMS 署名)
 
 ## 機能要件
 
-- REQ-A01: `docs/specs/purchase-sales/openapi.yaml` の全エンドポイントで、`Authorization: Bearer <JWT>` による認証を必須とする
+- REQ-A01: `docs/specs/purchase-sales/openapi.yaml` の全エンドポイントで、`Authorization: Bearer <JWT>` による認証を必須とする(REQ-A08 の local プロファイルを除く)
 - REQ-A02: 検証する JWT の発行者は、JWT 発行基盤(KMS 署名)の単一発行者に限る。Cognito が発行した JWT を直接受け付けない
 - REQ-A03: 署名は、あらかじめ設置した KMS 公開鍵(PEM、RSA 2048)で、RS256 に限って検証する。リクエストの都度 KMS にアクセスしない
 - REQ-A04: 署名に加えて有効期限(`exp`)を検証する。`exp` が無いトークンは不正とする
@@ -22,7 +22,13 @@ JWT 発行基盤の要件は `fasse_infra` の `docs/specs/authentication/` を�
   - JWT の形式が不正、`alg` が RS256 でない、署名が不正、有効期限切れ
   - 公開鍵が設定されていない、または PEM として解釈できない(フェイルクローズ)
 - REQ-A06: 検証に成功した JWT の `sub` をログのトレース情報(ユーザー ID)として付与する
-- REQ-A07: dev / stg / local は同一の公開鍵・同一のコードで検証する。環境ごとの差は公開鍵の設定値のみとする
+- REQ-A07: dev / stg は同一の公開鍵・同一のコードで検証する。環境ごとの差は公開鍵の設定値のみとする
+- REQ-A08: local プロファイルでは認証を行わない。`Authorization` ヘッダの有無・内容にかかわらず全エンドポイントを受け付ける。local プロファイルで認証を有効にする手段は設けない
+  - local プロファイルでは JWT の検証を行わないため、公開鍵の設定は不要とする
+  - CORS の設定は local プロファイルでも他の環境と同じく適用する
+  - ログのトレース情報のユーザー ID(REQ-A06)は付与しない(空とする)
+  - 起動時に、認証が無効であることを WARN ログで出力する
+- REQ-A09: 認証の無効化は local プロファイルに限る。dev / stg(`aws` プロファイル)と test プロファイルでは、設定値によって認証を無効化できない
 
 ## 非機能要件
 
@@ -34,4 +40,7 @@ JWT 発行基盤の要件は `fasse_infra` の `docs/specs/authentication/` を�
 - [ ] 有効な JWT 付きのリクエストが受け付けられる
 - [ ] REQ-A05 の各ケースで 401 と `{ "message", "requestId" }` が返る
 - [ ] 公開鍵が未設定でもアプリケーションは起動し、全 API が 401 を返す
+- [ ] local プロファイルでは、`Authorization` ヘッダ無し・不正な JWT でも 2xx が返る
+- [ ] local プロファイルでも、許可していないオリジンからの CORS リクエストは拒否される
+- [ ] local 以外のプロファイルでは、認証を無効化する構成が有効にならない
 - [ ] 上記を権限あり/なしの双方のケースで自動テストしている
