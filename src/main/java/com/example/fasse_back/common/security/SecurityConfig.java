@@ -2,6 +2,7 @@ package com.example.fasse_back.common.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,8 +19,11 @@ import org.springframework.security.web.SecurityFilterChain;
  * <li>CORS の preflight({@code OPTIONS})のみ認証なしで許可し、それ以外は全て認証必須</li>
  * <li>ロール・スコープによる認可は行わない</li>
  * </ul>
+ *
+ * local プロファイルでは本構成の代わりに {@link LocalSecurityConfig} を使う。
  */
 @Configuration
+@Profile("!local")
 public class SecurityConfig {
 
     @Bean

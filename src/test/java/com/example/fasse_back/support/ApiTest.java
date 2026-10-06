@@ -18,11 +18,13 @@ import com.example.fasse_back.common.config.FasseProperties;
 import com.example.fasse_back.common.config.JacksonConfig;
 import com.example.fasse_back.common.security.JsonAuthenticationEntryPoint;
 import com.example.fasse_back.common.security.JwtDecoderConfig;
+import com.example.fasse_back.common.security.LocalSecurityConfig;
 import com.example.fasse_back.common.security.SecurityConfig;
 
 /**
  * Controller の API テスト用アノテーション({@code @WebMvcTest} + Spring Security + JWT 検証)。
  * Service はテストクラス側で {@code @MockitoBean} にする。
+ * {@link LocalSecurityConfig} も読み込み、test プロファイルでは無効になること(認証が必須のままであること)を全 API テストで担保する。
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -31,7 +33,7 @@ import com.example.fasse_back.common.security.SecurityConfig;
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = JwtTestKeyInitializer.class)
 @EnableConfigurationProperties(FasseProperties.class)
-@Import({ SecurityConfig.class, JwtDecoderConfig.class, JsonAuthenticationEntryPoint.class,
+@Import({ SecurityConfig.class, JwtDecoderConfig.class, LocalSecurityConfig.class, JsonAuthenticationEntryPoint.class,
         JacksonConfig.class, CorsConfig.class })
 public @interface ApiTest {
 

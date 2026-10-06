@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.BadJwtException;
@@ -32,8 +33,11 @@ import com.example.fasse_back.common.config.FasseProperties;
  * <li>{@code exp} は必須とし、時刻の許容誤差は 0 秒とする。{@code iss} / {@code aud} は検証しない</li>
  * <li>公開鍵が未設定・不正な場合は起動を止めず、常に検証失敗とする(フェイルクローズ)</li>
  * </ul>
+ *
+ * local プロファイルでは JWT を検証しないため、本構成は読み込まない(design.md 3.2 節)。
  */
 @Configuration
+@Profile("!local")
 public class JwtDecoderConfig {
 
     private static final Logger log = LoggerFactory.getLogger(JwtDecoderConfig.class);

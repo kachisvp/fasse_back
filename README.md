@@ -378,12 +378,7 @@ spring:
     password: _任意のパスワード_
 
 fasse:
-  jwt:
-    # fasse_infra/jwt_public_key.pem の内容を記載する
-    public-key-pem: |
-      -----BEGIN PUBLIC KEY-----
-      _fasse_infra/jwt_public_key.pem の内容_
-      -----END PUBLIC KEY-----
+  # local プロファイルでは認証を行わないため、JWT の公開鍵(fasse.jwt)は設定不要
   cors:
     allowed-origins: http://localhost:5000
 ```
@@ -429,19 +424,20 @@ fasse:
 - 投入後にアプリケーションから登録しても、伝票番号・id はテストデータと重複しない
 - 動作確認でデータが崩れた場合も、同じコマンドで元の状態に戻せる
 
-#### JWT の取得と API の呼び出し
+#### API の呼び出し(認証なし)
 
-本リポジトリは JWT を発行しないため、[fasse_infra]の stg 環境の JWT 発行 API で取得する(有効期限 30 日)
+local プロファイルでは認証を行わないため、[Authorization]ヘッダを付けずに API を呼び出せる(仕様は[docs/specs/authentication/]の REQ-A08)
 
-- [POST /auth/token](AccessKey 経路)を呼び出して JWT を取得する。リクエストの形式は[fasse_infra]の[docs/specs/authentication/]を参照
-- API の呼び出し時は[Authorization: Bearer <JWT>]ヘッダを付ける
+- 起動時に[Authentication is DISABLED (local profile)]の WARN ログが出力される
+- [Authorization]ヘッダを付けた場合も、ヘッダは参照されずに受け付けられる
+- ログの[userId]は空になる
 - Postman で確認する場合は[fasse_infra/postman/]のコレクションを使い、ベース URL を[http://localhost:8080]に変更した環境で実行する
 
 ```
-curl -H "Authorization: Bearer <JWT>" http://localhost:8080/items
+curl http://localhost:8080/items
 ```
 
-> JWT が無い・不正な場合は 401 と[{"message": "...", "requestId": "..."}]が返る
+> 認証を無効化できるのは local プロファイルのみ。dev / stg(aws プロファイル)では JWT が必須で、JWT が無い・不正な場合は 401 と[{"message": "...", "requestId": "..."}]が返る
 
 ### Flutter
 
